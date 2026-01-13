@@ -51,11 +51,16 @@
     }
     .success { background: #d1fae5; color: #065f46; border: 2px solid #a7f3d0; }
     .error { background: #fee2e2; color: #991b1b; border: 2px solid #fca5a5; }
-    .note { 
+    .note, .warning { 
       font-size: 0.9rem; color: #666; 
       margin: 4px 0 20px; line-height: 1.5; 
       background: rgba(255,255,255,0.8); padding: 12px; 
-      border-radius: 8px; border-left: 4px solid #10b981; 
+      border-radius: 8px; 
+    }
+    .warning {
+      color: #c2410c;
+      background: #fef3c7;
+      border-left: 4px solid #f59e0b;
     }
     @media (max-width: 480px) { 
       body { padding: 10px; } 
@@ -72,8 +77,27 @@
       <label>📅 日期</label>
       <input type="date" id="date" required>
       
-      <label>🕒 時間</label>
+      <label>🕒 出發時間</label>
+      <div class="warning">
+        <strong>提醒：</strong>建議送機前至少 2 小時抵達航站<br>
+        （國際線建議 3 小時，國內線 2 小時）
+      </div>
       <input type="time" id="time" required>
+      
+      <label>✈️ 航班號碼</label>
+      <input type="text" id="flightNumber" placeholder="例如：CI123 / BR456 / 星宇JX789" required>
+      
+      <label>🏢 航廈</label>
+      <select id="terminal" required>
+        <option value="">請選擇航廈</option>
+        <option value="桃園第一航廈 (T1)">桃園第一航廈 (T1)</option>
+        <option value="桃園第二航廈 (T2)">桃園第二航廈 (T2)</option>
+        <option value="桃園第三航廈 (T3)">桃園第三航廈 (T3)</option>
+        <option value="松山機場">松山機場</option>
+        <option value="台中清泉崗機場">台中清泉崗機場</option>
+        <option value="高雄國際機場">高雄國際機場</option>
+        <option value="其他">其他（請在備註說明）</option>
+      </select>
       
       <label>📍 出發地</label>
       <input type="text" id="startAddress" placeholder="請輸入完整地址（含縣市、路名、號碼）" required>
@@ -87,9 +111,9 @@
       <label>🚙 車型選擇（含行李參考）</label>
       <select id="carType" required>
         <option value="">請選擇車型</option>
-        <option value="轎車（行李約2-3件）">轎車（行李約2-3件）</option>
+        <option value="舒適轎車（行李約1-2件）">舒適轎車（行李約1-2件）</option>
         <option value="五座休旅（行李約3-4件）">五座休旅（行李約3-4件）</option>
-        <option value="7人座（行李約4-6件）">7人座（行李約4-6件）</option>
+        <option value="7人座（行李約3-4件）">7人座（行李約3-4件）</option>
         <option value="8-9座大車（行李6件以上）">8-9座大車（行李6件以上）</option>
       </select>
       <div class="note">
@@ -104,7 +128,6 @@
         <option value="不需要">不需要</option>
         <option value="需要安全座椅">需要安全座椅（0-4歲）</option>
         <option value="需要增高墊">需要增高墊（4-12歲建議）</option>
-        <option value="不確定，請協助確認">不確定，請協助確認</option>
       </select>
       <div class="note">
         <strong>⚠️ 法規提醒：</strong><br>
@@ -154,58 +177,10 @@
         const params = {
           date: document.getElementById('date').value,
           time: document.getElementById('time').value,
+          flight: document.getElementById('flightNumber').value.trim(),
+          terminal: document.getElementById('terminal').value,
           start: document.getElementById('startAddress').value.trim(),
           via: document.getElementById('viaPoints').value.trim() || '無',
           end: document.getElementById('endAddress').value.trim(),
           car: document.getElementById('carType').value,
-          childSeat: document.getElementById('childSeat').value,
-          name: document.getElementById('name').value.trim(),
-          phone: document.getElementById('phone').value.trim()
-        };
-        
-        const required = ['date','time','start','end','car','childSeat','name','phone'];
-        const missing = required.filter(k => !params[k]);
-        if (missing.length) {
-          showMsg('❌ 請填寫所有必填欄位！', 'error');
-          resetBtn();
-          return;
-        }
-        
-        console.log('送出資料：', params);
-        
-        try {
-          await emailjs.send('service_gd932ui', 'template_53hb8ks', params);
-          showMsg('✅ 預約成功！完整資訊已寄出，我們會盡快聯繫確認。', 'success');
-          
-          document.getElementById('bookingForm').reset();
-          document.getElementById('date').value = today;
-        } catch (err) {
-          console.error('EmailJS 錯誤：', err);
-          showMsg('❌ 寄信失敗，請直接聯繫我們或重新送出。', 'error');
-        } finally {
-          setTimeout(() => msgDiv.style.display = 'none', 10000);
-          resetBtn();
-        }
-      });
-      
-      function showMsg(text, type) {
-        msgDiv.innerHTML = text;
-        msgDiv.className = type;
-        msgDiv.style.display = 'block';
-      }
-      
-      function resetBtn() {
-        btn.disabled = false;
-        btn.textContent = '✅ 送出預約';
-      }
-    }
-    
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initApp);
-    } else {
-      initApp();
-    }
-    window.addEventListener('load', initApp);
-  </script>
-</body>
-</html>
+          child

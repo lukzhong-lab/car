@@ -1,132 +1,71 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>接送預約表單</title>
-  <style>
-    body { font-family: system-ui, -apple-system, sans-serif; max-width: 620px; margin: 40px auto; padding: 20px; background: #f9fafb; color: #1f2937; }
-    h2 { text-align: center; color: #111827; margin-bottom: 2rem; }
-    label { display: block; margin: 1.2rem 0 0.4rem; font-weight: 600; color: #374151; }
-    input, select { width: 100%; padding: 0.75rem 1rem; margin-bottom: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem; box-sizing: border-box; }
-    input:focus, select:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
-    button { width: 100%; padding: 0.9rem; margin-top: 1.5rem; background: #10b981; color: white; border: none; border-radius: 0.5rem; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
-    button:hover:not(:disabled) { background: #059669; }
-    button:disabled { background: #9ca3af; cursor: not-allowed; }
-    #message { padding: 1rem; margin-top: 1.5rem; border-radius: 0.5rem; text-align: center; display: none; }
-    .success { background: #d1fae5; color: #065f46; }
-    .error   { background: #fee2e2; color: #991b1b; }
-    .note { font-size: 0.9rem; color: #6b7280; margin-top: -0.3rem; margin-bottom: 1rem; line-height: 1.4; }
-  </style>
-</head>
-<body>
+<!-- ... 前面的 HTML/CSS 保持不變，只改 <script> 部分 -->
 
-  <h2>接送預約表單</h2>
+<script type="text/javascript">
+  const PUBLIC_KEY  = "3NaCLzxTOKYgHeXyP";
+  const SERVICE_ID  = "service_gd932ui";
+  const TEMPLATE_ID = "template_53hb8ks";
 
-  <form id="bookingForm">
-    <label>日期</label><input type="date" id="date" required>
-    <label>時間</label><input type="time" id="time" required>
-    <label>出發地</label><input type="text" id="startAddress" placeholder="請輸入完整地址（含縣市、路名、號碼）" required>
-    <label>目的地</label><input type="text" id="endAddress" placeholder="請輸入完整地址（含縣市、路名、號碼）" required>
-    <label>車型選擇</label>
-    <select id="carType" required>
-      <option value="">請選擇車型</option>
-      <option value="轎車">轎車（1-4人）</option>
-      <option value="五座休旅">五座休旅（1-5人）</option>
-      <option value="7人座">7人座（1-7人）</option>
-      <option value="8-9座大車">8-9座大車（1-9人）</option>
-    </select>
-    <label>需要兒童安全座椅？</label>
-    <select id="childSeat" required>
-      <option value="">請選擇</option>
-      <option value="是">是，需要</option>
-      <option value="否">否，不需要</option>
-      <option value="不確定">不確定，請協助確認</option>
-    </select>
-    <div class="note"><strong>提醒：</strong>0~4歲需後座合格安全座椅，4~12歲建議增高墊。未使用可罰款 1,500~3,000 元。</div>
-    <label>姓名</label><input type="text" id="name" required>
-    <label>電話</label><input type="tel" id="phone" placeholder="0912345678 或 +886912345678" required>
-    <label>電子郵件（選填，用來寄確認信）</label><input type="email" id="email" placeholder="example@gmail.com">
-    <button type="button" id="submitBtn">送出預約</button>
-  </form>
+  emailjs.init({ publicKey: PUBLIC_KEY });
 
-  <div id="message"></div>
+  document.getElementById('date').value = new Date().toISOString().slice(0, 10);
 
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  const form = document.getElementById('bookingForm');
+  const btn = document.getElementById('submitBtn');
+  const msgDiv = document.getElementById('message');
 
-  <script type="text/javascript">
-    const PUBLIC_KEY  = "3NaCLzxTOKYgHeXyP";
-    const SERVICE_ID  = "service_gd932ui";
-    const TEMPLATE_ID = "template_53hb8ks";
+  btn.addEventListener('click', () => {
+    if (btn.disabled) return;
+    btn.disabled = true;
+    btn.textContent = '送出中...';
 
-    emailjs.init({ publicKey: PUBLIC_KEY });
+    const templateParams = {
+      date:      document.getElementById('date').value,
+      time:      document.getElementById('time').value,
+      start:     document.getElementById('startAddress').value.trim(),
+      end:       document.getElementById('endAddress').value.trim(),
+      car:       document.getElementById('carType').value,
+      childSeat: document.getElementById('childSeat').value,
+      name:      document.getElementById('name').value.trim(),
+      phone:     document.getElementById('phone').value.trim(),
+      email:     document.getElementById('email').value.trim() || '未填寫'
+    };
 
-    document.getElementById('date').value = new Date().toISOString().slice(0, 10);
+    if (!templateParams.date || !templateParams.time || !templateParams.start || 
+        !templateParams.end || !templateParams.car || !templateParams.childSeat || 
+        !templateParams.name || !templateParams.phone) {
+      showMessage('請填寫所有必填欄位！', 'error');
+      resetButton();
+      return;
+    }
 
-    const form = document.getElementById('bookingForm');
-    const btn = document.getElementById('submitBtn');
-    const msgDiv = document.getElementById('message');
+    console.log('即將寄出的完整資料（key 必須與模板 {{ }} 匹配）：', JSON.stringify(templateParams, null, 2));
 
-    btn.addEventListener('click', () => {
-      if (btn.disabled) return;
-      btn.disabled = true;
-      btn.textContent = '送出中...';
+    emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams)
+      .then((response) => {
+        console.log('寄信成功！狀態碼：', response.status);
+        showMessage(`預約已成功送出！<br>完整資訊已寄出（姓名、電話、地點、車型等全部包含）。<br>若信件未顯示完整，請檢查 EmailJS 模板變數名稱。`, 'success');
 
-      const templateParams = {
-        date:      document.getElementById('date').value,
-        time:      document.getElementById('time').value,
-        start:     document.getElementById('startAddress').value.trim(),
-        end:       document.getElementById('endAddress').value.trim(),
-        car:       document.getElementById('carType').value,
-        childSeat: document.getElementById('childSeat').value,
-        name:      document.getElementById('name').value.trim(),
-        phone:     document.getElementById('phone').value.trim(),
-        email:     document.getElementById('email').value.trim() || '未填寫'
-      };
-
-      if (!templateParams.date || !templateParams.time || !templateParams.start || 
-          !templateParams.end || !templateParams.car || !templateParams.childSeat || 
-          !templateParams.name || !templateParams.phone) {
-        showMessage('請填寫所有必填欄位！', 'error');
+        form.reset();
+        document.getElementById('date').value = new Date().toISOString().slice(0, 10);
+      })
+      .catch((err) => {
+        console.error('EmailJS 錯誤細節：', err);
+        showMessage('寄信失敗，請檢查 F12 Console 錯誤，或直接聯繫我們。', 'error');
+      })
+      .finally(() => {
+        setTimeout(() => { msgDiv.style.display = 'none'; }, 8000);
         resetButton();
-        return;
-      }
+      });
+  });
 
-      // 方便 debug：在控制台印出完整送出的資料
-      console.log('即將寄出的完整預約資訊：', templateParams);
+  function showMessage(text, type) {
+    msgDiv.innerHTML = text;
+    msgDiv.className = type;
+    msgDiv.style.display = 'block';
+  }
 
-      emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams)
-        .then((response) => {
-          console.log('寄信成功！', response.status, response.text);
-          let successText = `預約已成功送出！<br><br>所有資訊（姓名、電話、日期、時間、地點、車型等）已完整寄出，我們會盡快聯繫確認。`;
-          if (templateParams.email !== '未填寫') {
-            successText += `<br>確認信將寄至：${templateParams.email}`;
-          }
-          showMessage(successText, 'success');
-
-          form.reset();
-          document.getElementById('date').value = new Date().toISOString().slice(0, 10);
-        })
-        .catch((err) => {
-          console.error('EmailJS 寄信失敗：', err);
-          showMessage('寄信失敗，請檢查控制台（F12）錯誤訊息，或直接打電話聯繫我們。', 'error');
-        })
-        .finally(() => {
-          setTimeout(() => { msgDiv.style.display = 'none'; }, 8000);
-          resetButton();
-        });
-    });
-
-    function showMessage(text, type) {
-      msgDiv.innerHTML = text;
-      msgDiv.className = type;
-      msgDiv.style.display = 'block';
-    }
-
-    function resetButton() {
-      btn.disabled = false;
-      btn.textContent = '送出預約';
-    }
-  </script>
-</body>
-</html>
+  function resetButton() {
+    btn.disabled = false;
+    btn.textContent = '送出預約';
+  }
+</script>

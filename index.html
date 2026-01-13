@@ -52,9 +52,8 @@
     .success { background: #d1fae5; color: #065f46; border: 2px solid #a7f3d0; }
     .error { background: #fee2e2; color: #991b1b; border: 2px solid #fca5a5; }
     .note, .warning { 
-      font-size: 0.9rem; color: #666; 
-      margin: 4px 0 20px; line-height: 1.5; 
-      background: rgba(255,255,255,0.8); padding: 12px; 
+      font-size: 0.9rem; line-height: 1.5; 
+      margin: 4px 0 20px; padding: 12px; 
       border-radius: 8px; 
     }
     .warning {
@@ -79,24 +78,22 @@
       
       <label>🕒 出發時間</label>
       <div class="warning">
-        <strong>提醒：</strong>建議送機前至少 2 小時抵達航站<br>
-        （國際線建議 3 小時，國內線 2 小時）
+        <strong>抵達機場建議時間：</strong><br>
+        • 國際線 (International Flights)：建議在起飛前 2 - 3 小時抵達機場，辦理報到和安檢。<br>
+        • 國內線 (Domestic Flights)：建議在起飛前 1 小時抵達，最晚在起飛前 30 分鐘完成報到。<br>
+        • 飛往美國航班：由於安全檢查嚴格，建議提早 3 小時。
       </div>
       <input type="time" id="time" required>
       
       <label>✈️ 航班號碼</label>
-      <input type="text" id="flightNumber" placeholder="例如：CI123 / BR456 / 星宇JX789" required>
+      <input type="text" id="flightNumber" placeholder="例如：CI123 / BR456 / JX789" required oninput="this.value = this.value.toUpperCase();">
       
       <label>🏢 航廈</label>
       <select id="terminal" required>
         <option value="">請選擇航廈</option>
-        <option value="桃園第一航廈 (T1)">桃園第一航廈 (T1)</option>
-        <option value="桃園第二航廈 (T2)">桃園第二航廈 (T2)</option>
-        <option value="桃園第三航廈 (T3)">桃園第三航廈 (T3)</option>
-        <option value="松山機場">松山機場</option>
-        <option value="台中清泉崗機場">台中清泉崗機場</option>
-        <option value="高雄國際機場">高雄國際機場</option>
-        <option value="其他">其他（請在備註說明）</option>
+        <option value="T1">T1</option>
+        <option value="T2">T2</option>
+        <option value="T3">T3</option>
       </select>
       
       <label>📍 出發地</label>
@@ -106,7 +103,13 @@
       <input type="text" id="viaPoints" placeholder="例如：台北車站, 松山機場">
       
       <label>📍 目的地</label>
-      <input type="text" id="endAddress" placeholder="請輸入完整地址（含縣市、路名、號碼）" required>
+      <select id="endAddress" required>
+        <option value="">請選擇或輸入目的地</option>
+        <option value="桃園機場">桃園機場</option>
+        <option value="松山機場">松山機場</option>
+        <option value="其他">其他（請手動輸入完整地址）</option>
+      </select>
+      <input type="text" id="endAddressCustom" placeholder="若選「其他」，請輸入完整地址" style="margin-top: 8px; display: none;">
       
       <label>🚙 車型選擇（含行李參考）</label>
       <select id="carType" required>
@@ -165,6 +168,20 @@
       const today = new Date().toISOString().slice(0, 10);
       document.getElementById('date').value = today;
       
+      // 目的地選擇：如果選「其他」，顯示自訂輸入框
+      const endSelect = document.getElementById('endAddress');
+      const endCustom = document.getElementById('endAddressCustom');
+      endSelect.addEventListener('change', () => {
+        if (endSelect.value === '其他') {
+          endCustom.style.display = 'block';
+          endCustom.required = true;
+        } else {
+          endCustom.style.display = 'none';
+          endCustom.required = false;
+          endCustom.value = '';
+        }
+      });
+      
       const btn = document.getElementById('submitBtn');
       const msgDiv = document.getElementById('message');
       
@@ -174,13 +191,74 @@
         btn.disabled = true;
         btn.textContent = '📤 送出中...';
         
+        let endValue = endSelect.value;
+        if (endSelect.value === '其他') {
+          endValue = endCustom.value.trim();
+          if (!endValue) {
+            showMsg('❌ 若目的地為「其他」，請填寫完整地址！', 'error');
+            resetBtn();
+            return;
+          }
+        }
+        
         const params = {
           date: document.getElementById('date').value,
           time: document.getElementById('time').value,
-          flight: document.getElementById('flightNumber').value.trim(),
+          flight: document.getElementById('flightNumber').value.trim().toUpperCase(),
           terminal: document.getElementById('terminal').value,
           start: document.getElementById('startAddress').value.trim(),
           via: document.getElementById('viaPoints').value.trim() || '無',
-          end: document.getElementById('endAddress').value.trim(),
+          end: endValue,
           car: document.getElementById('carType').value,
-          child
+          childSeat: document.getElementById('childSeat').value,
+          name: document.getElementById('name').value.trim(),
+          phone: document.getElementById('phone').value.trim()
+        };
+        
+        const required = ['date','time','flight','terminal','start','end','car','childSeat','name','phone'];
+        const missing = required.filter(k => !params[k]);
+        if (missing.length) {
+          showMsg('❌ 請填寫所有必填欄位！', 'error');
+          resetBtn();
+          return;
+        }
+        
+        console.log('送出資料：', params);
+        
+        try {
+          await emailjs.send('service_gd932ui', 'template_53hb8ks', params);
+          showMsg('✅ 預約成功！完整資訊已寄出，我們會盡快聯繫確認。', 'success');
+          
+          document.getElementById('bookingForm').reset();
+          document.getElementById('date').value = today;
+          endCustom.style.display = 'none';
+        } catch (err) {
+          console.error('EmailJS 錯誤：', err);
+          showMsg('❌ 寄信失敗，請直接聯繫我們或重新送出。', 'error');
+        } finally {
+          setTimeout(() => msgDiv.style.display = 'none', 10000);
+          resetBtn();
+        }
+      });
+      
+      function showMsg(text, type) {
+        msgDiv.innerHTML = text;
+        msgDiv.className = type;
+        msgDiv.style.display = 'block';
+      }
+      
+      function resetBtn() {
+        btn.disabled = false;
+        btn.textContent = '✅ 送出預約';
+      }
+    }
+    
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initApp);
+    } else {
+      initApp();
+    }
+    window.addEventListener('load', initApp);
+  </script>
+</body>
+</html>

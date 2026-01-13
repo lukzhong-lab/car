@@ -156,4 +156,58 @@
       const templateParams = {
         date:      document.getElementById('date').value,
         time:      document.getElementById('time').value,
-        start:     document.get
+        start:     document.getElementById('startAddress').value.trim(),
+        end:       document.getElementById('endAddress').value.trim(),
+        car:       document.getElementById('carType').value,
+        childSeat: document.getElementById('childSeat').value,
+        name:      document.getElementById('name').value.trim(),
+        phone:     document.getElementById('phone').value.trim(),
+        email:     document.getElementById('email').value.trim() || '未填寫'
+      };
+
+      // 必填檢查
+      if (!templateParams.date || !templateParams.time || !templateParams.start || 
+          !templateParams.end || !templateParams.car || !templateParams.childSeat || 
+          !templateParams.name || !templateParams.phone) {
+        showMessage('請填寫所有必填欄位！', 'error');
+        resetButton();
+        return;
+      }
+
+      // 寄送信件
+      emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams)
+        .then((response) => {
+          console.log('EmailJS 寄信成功！', response.status, response.text);
+          let successText = `預約已成功送出！<br><br>我們已收到您的預約，我們會盡快聯繫確認。`;
+          if (templateParams.email !== '未填寫') {
+            successText += `<br>確認信將寄至：${templateParams.email}`;
+          }
+          showMessage(successText, 'success');
+
+          form.reset();
+          document.getElementById('date').value = new Date().toISOString().slice(0, 10);
+        })
+        .catch((err) => {
+          console.error('EmailJS 寄信失敗：', err);
+          showMessage('寄信發生錯誤，請檢查瀏覽器控制台（F12）訊息，或直接致電我們。', 'error');
+        })
+        .finally(() => {
+          setTimeout(() => { msgDiv.style.display = 'none'; }, 8000);
+          resetButton();
+        });
+    });
+
+    function showMessage(text, type) {
+      msgDiv.innerHTML = text;
+      msgDiv.className = type;
+      msgDiv.style.display = 'block';
+    }
+
+    function resetButton() {
+      btn.disabled = false;
+      btn.textContent = '送出預約';
+    }
+  </script>
+
+</body>
+</html>

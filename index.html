@@ -5,21 +5,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>接送預約表單</title>
 <style>
-* { box-sizing: border-box; }
-body { font-family: system-ui, -apple-system, sans-serif; margin:0; padding:15px; background: linear-gradient(135deg,#f5f7fa 0%,#c3cfe2 100%);}
-.container { max-width: 600px; margin: 0 auto; }
-h2 { text-align:center; margin-bottom:30px; }
-label { display:block; margin:15px 0 5px; font-weight:600; }
-input, select, button { width:100%; padding:12px; border-radius:8px; border:1px solid #ccc; margin-bottom:10px; font-size:16px; }
-button { background: linear-gradient(135deg, #10b981, #059669); color:white; border:none; cursor:pointer; transition: all 0.3s;}
-button:hover:not(:disabled) { opacity:0.9; transform: translateY(-1px); }
-button:disabled { background:#9ca3af; cursor:not-allowed; transform:none; }
-.note, .warning { font-size:0.9rem; padding:8px; border-radius:6px; margin-bottom:10px; }
-.warning { background:#fef3c7; border-left:4px solid #f59e0b; color:#c2410c; }
-.note { background:#d1fae5; border-left:4px solid #10b981; color:#065f46; }
-#message { display:none; padding:12px; text-align:center; border-radius:8px; margin-top:10px; font-weight:500; opacity:0; transition: opacity 0.5s; }
-#message.success { background:#d1fae5; color:#065f46; border:2px solid #10b981; }
-#message.error { background:#fee2e2; color:#991b1b; border:2px solid #fca5a5; }
+*{box-sizing:border-box;}
+body{font-family:system-ui,-apple-system,sans-serif;margin:0;padding:15px;background:linear-gradient(135deg,#f5f7fa 0%,#c3cfe2 100%);}
+.container{max-width:600px;margin:0 auto;}
+h2{text-align:center;margin-bottom:30px;}
+label{display:block;margin:15px 0 5px;font-weight:600;}
+input,select,button{width:100%;padding:12px;border-radius:8px;border:1px solid #ccc;margin-bottom:10px;font-size:16px;}
+button{background:linear-gradient(135deg, #10b981, #059669);color:white;border:none;cursor:pointer;transition: all 0.3s;}
+button:hover:not(:disabled){opacity:0.9;transform:translateY(-1px);}
+button:disabled{background:#9ca3af;cursor:not-allowed;transform:none;}
+.note,.warning{font-size:0.9rem;padding:8px;border-radius:6px;margin-bottom:10px;}
+.warning{background:#fef3c7;border-left:4px solid #f59e0b;color:#c2410c;}
+.note{background:#d1fae5;border-left:4px solid #10b981;color:#065f46;}
+#message{display:none;padding:12px;text-align:center;border-radius:8px;margin-top:10px;font-weight:500;opacity:0;transition: opacity 0.5s;}
+#message.success{background:#d1fae5;color:#065f46;border:2px solid #10b981;}
+#message.error{background:#fee2e2;color:#991b1b;border:2px solid #fca5a5;}
 @media(max-width:480px){body{padding:10px;}h2{font-size:1.3rem;}}
 </style>
 </head>
@@ -68,7 +68,7 @@ button:disabled { background:#9ca3af; cursor:not-allowed; transform:none; }
     <option value="松山機場">松山機場</option>
     <option value="其他">其他</option>
   </select>
-  <input type="text" id="endAddressCustom" placeholder="若選其他請填完整地址" style="display:none; margin-top:8px;">
+  <input type="text" id="endAddressCustom" placeholder="若選其他請填完整地址" style="display:none;margin-top:8px;">
 
   <label>🚙 車型選擇（含行李參考）</label>
   <select id="carType" required>
@@ -104,14 +104,12 @@ button:disabled { background:#9ca3af; cursor:not-allowed; transform:none; }
 </div>
 
 <script>
-const BOT_TOKEN = "8173906783:AAE49j3pZxJotOGBfpPe_rzME1IlXIArfvM";
-const CHAT_ID = "740877445";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw-Kguq9k4jfkHEyu0NIZcK7wJZ3csU8NU3_93YGY9JS7auz4pEgsmva8bpepk7vvlB/exec";
 const today = new Date().toISOString().slice(0,10);
 document.getElementById("date").value = today;
 
 const endAddress = document.getElementById("endAddress");
 const endCustom = document.getElementById("endAddressCustom");
-
 endAddress.addEventListener("change", ()=>{
   if(endAddress.value==="其他"){
     endCustom.style.display="block";
@@ -151,36 +149,38 @@ document.getElementById("bookingForm").addEventListener("submit", async (e)=>{
   const endValue = endAddress.value==="其他"? endCustom.value.trim() : endAddress.value;
   const viaPoints = [...document.getElementsByClassName("via-input")].map(v=>v.value.trim()).filter(v=>v).join("、") || "無";
 
-  const msg = `
-🚗 新接送預約
-📅 日期：${document.getElementById("date").value}
-🕒 出發時間：${document.getElementById("time").value}
-✈️ 航班號碼：${document.getElementById("flightNumber").value.trim().toUpperCase()}
-🏢 航廈：${document.getElementById("terminal").value}
-📍 出發地：${document.getElementById("startAddress").value.trim()}
-🛣️ 中途停靠：${viaPoints}
-📍 目的地：${endValue}
-🚙 車型：${document.getElementById("carType").value}
-🪑 兒童座椅/增高墊：${document.getElementById("childSeat").value}
-🧳 行李備註：${document.getElementById("luggageNote").value || "無"}
-👤 姓名：${document.getElementById("name").value.trim()}
-📱 電話：${document.getElementById("phone").value.trim()}
-`;
+  const payload = {
+    date: document.getElementById("date").value,
+    time: document.getElementById("time").value,
+    flight: document.getElementById("flightNumber").value.trim().toUpperCase(),
+    terminal: document.getElementById("terminal").value,
+    start: document.getElementById("startAddress").value.trim(),
+    via: viaPoints,
+    end: endValue,
+    car: document.getElementById("carType").value,
+    childSeat: document.getElementById("childSeat").value,
+    luggageNote: document.getElementById("luggageNote").value.trim(),
+    name: document.getElementById("name").value.trim(),
+    phone: document.getElementById("phone").value.trim()
+  };
 
   try{
-    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{
+    const response = await fetch(WEB_APP_URL, {
       method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({chat_id:CHAT_ID, text:msg})
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(payload)
     });
-    showMsg("✅ 預約已送出，Telegram 即時通知", "success");
-    btn.textContent = "✅ 送出成功";
-    setTimeout(()=>{btn.textContent="✅ 送出預約";},2000);
-
-    // 自動清空表單
-    document.getElementById("bookingForm").reset();
-    document.getElementById("date").value = today;
-    endCustom.style.display="none";
+    const data = await response.json();
+    if(data.status==="ok"){
+      showMsg("✅ 預約已送出，Telegram 即時通知", "success");
+      btn.textContent = "✅ 送出成功";
+      setTimeout(()=>{btn.textContent="✅ 送出預約";},2000);
+      document.getElementById("bookingForm").reset();
+      document.getElementById("date").value = today;
+      endCustom.style.display="none";
+    } else {
+      throw new Error(data.error || "後端錯誤");
+    }
   }catch(err){
     console.error(err);
     showMsg("❌ 送出失敗，請重試", "error");

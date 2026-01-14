@@ -76,10 +76,8 @@ iframe#hiddenFrame { display: none; }
 </style>
 </head>
 <body>
-
 <div class="container">
   <h2>🚗 接送預約表單</h2>
-
   <iframe name="hiddenFrame" id="hiddenFrame"></iframe>
 
   <form id="bookingForm" 
@@ -168,7 +166,6 @@ const btn = form.querySelector("button");
 const msgDiv = document.getElementById("message");
 
 form.addEventListener("submit", function(e) {
-  // 簡單前端驗證
   let valid = true;
   form.querySelectorAll("[required]").forEach(el => {
     if (!el.value.trim()) valid = false;
@@ -184,7 +181,6 @@ form.addEventListener("submit", function(e) {
   showMsg("正在送出，請稍候...", "success");
 });
 
-// 提交完成後（iframe 載入）
 document.getElementById("hiddenFrame").addEventListener("load", function() {
   showMsg("預約已送出，我們會盡快確認！", "success");
   form.reset();

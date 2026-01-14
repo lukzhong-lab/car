@@ -57,13 +57,28 @@ button {
 button:disabled {
   background: #9ca3af;
 }
+
 .note {
   font-size: 14px;
-  background: #fef3c7;
+  background: #ecfeff;
   padding: 12px;
-  border-radius: 8px;
-  margin-top: 6px;
+  border-radius: 10px;
+  margin-top: 8px;
+  line-height: 1.5;
+  color: #065f46;
 }
+
+.warning {
+  background: #fef3c7;
+  color: #92400e;
+  padding: 14px;
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1.5;
+  margin-top: 8px;
+  border-left: 4px solid #f59e0b;
+}
+
 #message {
   display: none;
   margin-top: 20px;
@@ -96,12 +111,8 @@ button:disabled {
   border: none;
   color: #fff;
 }
-.via-add {
-  background: #10b981;
-}
-.via-remove {
-  background: #ef4444;
-}
+.via-add { background: #10b981; }
+.via-remove { background: #ef4444; }
 </style>
 </head>
 
@@ -116,6 +127,14 @@ button:disabled {
 
 <label>🕒 出發時間</label>
 <input type="time" id="time" required>
+
+<div class="warning">
+  <strong>✈️ 抵達機場建議時間：</strong><br>
+  • 國際線：起飛前 <b>2–3 小時</b><br>
+  • 國內線：起飛前 <b>1 小時</b><br>
+  • 飛往美國航班：建議 <b>3 小時以上</b><br>
+  ⚠️ 請自行預留塞車與安檢時間
+</div>
 
 <label>✈️ 航班號碼</label>
 <input type="text" id="flightNumber" required placeholder="CI123" oninput="this.value=this.value.toUpperCase()">
@@ -146,30 +165,37 @@ button:disabled {
 <option value="松山機場">松山機場</option>
 <option value="其他">其他</option>
 </select>
-<input id="endCustom" placeholder="請輸入完整地址" style="display:none;margin-top:8px">
+<input id="endCustom" placeholder="若選其他請輸入完整地址" style="display:none;margin-top:8px">
 
-<label>🚙 車型</label>
+<label>🚙 車型選擇（含行李參考）</label>
 <select id="carType" required>
 <option value="">請選擇</option>
-<option>舒適轎車</option>
-<option>五座休旅</option>
-<option>7人座</option>
-<option>8-9座</option>
+<option>舒適轎車（行李1–2件）</option>
+<option>五座休旅（行李3–4件）</option>
+<option>7人座（行李3–4件）</option>
+<option>8–9座大車（行李6件以上）</option>
 </select>
 
-<label>🪑 兒童座椅</label>
+<div class="note">
+  <strong>🧳 車型與行李提醒：</strong><br>
+  • 行李以大型行李箱為主<br>
+  • 若有嬰兒車、高爾夫球袋、紙箱等大型物品<br>
+  👉 請提前告知，避免臨時無法載運
+</div>
+
+<label>🪑 兒童安全座椅</label>
 <select id="childSeat" required>
 <option value="">請選擇</option>
 <option>不需要</option>
-<option>安全座椅</option>
-<option>增高墊</option>
+<option>需要安全座椅（0–4歲）</option>
+<option>需要增高墊（4–12歲）</option>
 </select>
 
 <label>👤 姓名</label>
 <input id="name" required>
 
 <label>📱 電話</label>
-<input id="phone" required>
+<input id="phone" required placeholder="0912345678">
 
 <button type="button" id="submitBtn">✅ 送出預約</button>
 
@@ -183,24 +209,22 @@ button:disabled {
 <script>
 emailjs.init({ publicKey: "3NaCLzxTOKYgHeXyP" });
 
-document.getElementById('date').value = new Date().toISOString().slice(0,10);
+date.value = new Date().toISOString().slice(0,10);
 
 // 目的地其他
-const endSel = document.getElementById('endAddress');
-const endCus = document.getElementById('endCustom');
-endSel.onchange = () => {
-  endCus.style.display = endSel.value === '其他' ? 'block' : 'none';
+endAddress.onchange = () => {
+  endCustom.style.display = endAddress.value === '其他' ? 'block' : 'none';
 };
 
-// 中途停靠點 + / -
-document.getElementById('viaContainer').onclick = e => {
+// 中途停靠點
+viaContainer.onclick = e => {
   if (e.target.classList.contains('via-add')) {
     const row = document.createElement('div');
     row.className = 'via-row';
     row.innerHTML = `
       <input class="via-input" placeholder="請輸入中途地址">
       <button type="button" class="via-remove">✕</button>`;
-    document.getElementById('viaContainer').appendChild(row);
+    viaContainer.appendChild(row);
   }
   if (e.target.classList.contains('via-remove')) {
     e.target.parentElement.remove();
@@ -208,10 +232,9 @@ document.getElementById('viaContainer').onclick = e => {
 };
 
 // 送出
-document.getElementById('submitBtn').onclick = async () => {
-  const btn = event.target;
-  btn.disabled = true;
-  btn.textContent = '送出中...';
+submitBtn.onclick = async () => {
+  submitBtn.disabled = true;
+  submitBtn.textContent = '送出中...';
 
   const vias = [...document.querySelectorAll('.via-input')]
     .map(v => v.value.trim())
@@ -219,23 +242,19 @@ document.getElementById('submitBtn').onclick = async () => {
     .join('、') || '無';
 
   try {
-    await emailjs.send(
-      'service_gd932ui',
-      'template_53hb8ks',
-      {
-        date: date.value,
-        time: time.value,
-        flight: flightNumber.value,
-        terminal: terminal.value,
-        start: startAddress.value,
-        via: vias,
-        end: endSel.value === '其他' ? endCus.value : endSel.value,
-        car: carType.value,
-        childSeat: childSeat.value,
-        name: name.value,
-        phone: phone.value
-      }
-    );
+    await emailjs.send('service_gd932ui','template_53hb8ks',{
+      date: date.value,
+      time: time.value,
+      flight: flightNumber.value,
+      terminal: terminal.value,
+      start: startAddress.value,
+      via: vias,
+      end: endAddress.value === '其他' ? endCustom.value : endAddress.value,
+      car: carType.value,
+      childSeat: childSeat.value,
+      name: name.value,
+      phone: phone.value
+    });
     message.className = 'success';
     message.textContent = '✅ 預約成功，已送出！';
   } catch {
@@ -244,8 +263,8 @@ document.getElementById('submitBtn').onclick = async () => {
   }
 
   message.style.display = 'block';
-  btn.disabled = false;
-  btn.textContent = '✅ 送出預約';
+  submitBtn.disabled = false;
+  submitBtn.textContent = '✅ 送出預約';
 };
 </script>
 </body>

@@ -2,132 +2,201 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
 <title>接送預約表單</title>
+
 <style>
-body{font-family:system-ui;margin:15px;background:#f5f7fa;}
-.container{max-width:600px;margin:0 auto;}
-label{display:block;margin:10px 0 3px;font-weight:600;}
-input,select,button{width:100%;padding:10px;margin-bottom:10px;border-radius:6px;border:1px solid #ccc;}
-button{background:linear-gradient(135deg,#10b981,#059669);color:white;border:none;cursor:pointer;}
-button:disabled{background:#9ca3af;cursor:not-allowed;}
-#message{display:none;padding:10px;border-radius:6px;margin-top:10px;text-align:center;}
-#message.success{background:#d1fae5;color:#065f46;}
-#message.error{background:#fee2e2;color:#991b1b;}
+:root{
+  --font-base: 18px;
+  --font-label: 17px;
+  --radius: 10px;
+}
+
+*{box-sizing:border-box;}
+
+body{
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+               "Noto Sans TC", "PingFang TC", sans-serif;
+  margin:0;
+  padding:16px;
+  background:#f5f7fa;
+  font-size:var(--font-base);
+}
+
+.container{
+  max-width:640px;
+  margin:auto;
+  background:#fff;
+  padding:18px;
+  border-radius:14px;
+  box-shadow:0 8px 20px rgba(0,0,0,.08);
+}
+
+h2{
+  text-align:center;
+  margin-bottom:18px;
+  font-size:22px;
+}
+
+label{
+  display:block;
+  margin:14px 0 6px;
+  font-size:var(--font-label);
+  font-weight:600;
+}
+
+input, select{
+  width:100%;
+  padding:14px;
+  font-size:18px;
+  border-radius:var(--radius);
+  border:1px solid #ccc;
+}
+
+button{
+  width:100%;
+  padding:16px;
+  font-size:19px;
+  border-radius:var(--radius);
+  border:none;
+  cursor:pointer;
+}
+
+button[type="submit"]{
+  margin-top:20px;
+  background:linear-gradient(135deg,#10b981,#059669);
+  color:white;
+  font-weight:700;
+}
+
+button[type="button"]{
+  background:#e5e7eb;
+  margin-top:8px;
+}
+
+button:disabled{
+  opacity:.6;
+}
+
+#message{
+  display:none;
+  margin-top:16px;
+  padding:14px;
+  text-align:center;
+  border-radius:var(--radius);
+  font-size:18px;
+}
+
+#message.success{
+  background:#d1fae5;
+  color:#065f46;
+}
+
+#message.error{
+  background:#fee2e2;
+  color:#991b1b;
+}
+
+/* 手機再放大一點 */
+@media (max-width:480px){
+  body{font-size:19px;}
+  input,select{font-size:19px;}
+  button{font-size:20px;}
+}
 </style>
 </head>
+
 <body>
 <div class="container">
 <h2>🚗 接送預約表單</h2>
+
 <form id="bookingForm">
-  <label>📅 日期</label>
-  <input type="date" id="date" required>
 
-  <label>🕒 出發時間</label>
-  <input type="time" id="time" required>
+<label>📅 日期</label>
+<input type="date" id="date" required>
 
-  <label>✈️ 航班號碼</label>
-  <input type="text" id="flightNumber" required>
+<label>🕒 出發時間</label>
+<input type="time" id="time" required>
 
-  <label>🏢 航廈</label>
-  <select id="terminal" required>
-    <option value="">請選航廈</option>
-    <option value="T1">T1</option>
-    <option value="T2">T2</option>
-    <option value="T3">T3</option>
-  </select>
+<label>✈️ 航班號碼</label>
+<input type="text" id="flight" required>
 
-  <label>📍 出發地</label>
-  <input type="text" id="startAddress" required>
+<label>🏢 航廈</label>
+<select id="terminal" required>
+  <option value="">請選航廈</option>
+  <option value="T1">T1</option>
+  <option value="T2">T2</option>
+  <option value="T3">T3</option>
+</select>
 
-  <label>📍 目的地</label>
-  <select id="endAddress" required>
-    <option value="">請選擇或輸入</option>
-    <option value="桃園機場">桃園機場</option>
-    <option value="松山機場">松山機場</option>
-    <option value="其他">其他</option>
-  </select>
-  <input type="text" id="endAddressCustom" placeholder="若選其他請填完整地址" style="display:none;margin-top:5px;">
+<label>📍 出發地</label>
+<input type="text" id="start" required>
 
-  <label>🚙 車型選擇（含行李參考）</label>
-  <select id="carType" required>
-    <option value="">請選車型</option>
-    <option value="舒適轎車（行李約1-2件）">舒適轎車</option>
-    <option value="五座休旅（行李約3-4件）">五座休旅</option>
-    <option value="7人座（行李約3-4件）">7人座</option>
-    <option value="8-9座大車（行李6件以上）">8-9座大車</option>
-  </select>
+<label>📍 目的地</label>
+<input type="text" id="end" required>
 
-  <label>🧳 行李備註（選填）</label>
-  <input type="text" id="luggageNote">
+<label>🚙 車型</label>
+<select id="car" required>
+  <option value="">請選車型</option>
+  <option value="舒適轎車">舒適轎車</option>
+  <option value="五座休旅">五座休旅</option>
+  <option value="7人座">7人座</option>
+  <option value="8-9座大車">8-9座大車</option>
+</select>
 
-  <label>🪑 兒童安全座椅 / 增高墊需求</label>
-  <select id="childSeat" required>
-    <option value="">請選</option>
-    <option value="不需要">不需要</option>
-    <option value="需要安全座椅">安全座椅</option>
-    <option value="需要增高墊">增高墊</option>
-  </select>
+<label>🧳 行李備註</label>
+<input type="text" id="luggageNote">
 
-  <label>🛣️ 中途停靠點（選填）</label>
-  <div id="viaContainer"><input type="text" class="via-input" placeholder="例如：台北車站"></div>
-  <button type="button" id="addVia">➕ 新增停靠點</button>
+<label>🪑 兒童座椅</label>
+<select id="childSeat" required>
+  <option value="">請選</option>
+  <option value="不需要">不需要</option>
+  <option value="安全座椅">安全座椅</option>
+  <option value="增高墊">增高墊</option>
+</select>
 
-  <label>👤 姓名</label>
-  <input type="text" id="name" required>
+<label>🛣️ 中途停靠</label>
+<input type="text" id="via" placeholder="可留空">
 
-  <label>📱 電話</label>
-  <input type="tel" id="phone" required>
+<label>👤 姓名</label>
+<input type="text" id="name" required>
 
-  <button type="submit">✅ 送出預約</button>
+<label>📱 電話</label>
+<input type="tel" id="phone" required>
+
+<button type="submit">✅ 送出預約</button>
 </form>
 
 <div id="message"></div>
 </div>
 
 <script>
-const WEB_APP_URL = "你的 Web App URL"; // 替換
+const WEB_APP_URL =
+"https://script.google.com/macros/s/AKfycbxh2xIOj8g2n9-9BOU0smPWbPO_fZwgyCT46ZkcgXVWjby9oiQ7dm0XPRLwcM3ZyHa-fA/exec";
 
-document.getElementById("date").value=new Date().toISOString().slice(0,10);
+document.getElementById("date").value =
+new Date().toISOString().slice(0,10);
 
-const endSelect=document.getElementById("endAddress");
-const endCustom=document.getElementById("endAddressCustom");
-endSelect.addEventListener("change",()=>{ 
-  endCustom.style.display=endSelect.value==="其他"?"block":"none"; 
-  endCustom.required=endSelect.value==="其他"; 
-  if(endSelect.value!=="其他") endCustom.value="";
-});
-
-document.getElementById("addVia").addEventListener("click",()=>{
-  const input=document.createElement("input");
-  input.type="text";
-  input.placeholder="中途停靠地址（選填）";
-  input.className="via-input";
-  document.getElementById("viaContainer").appendChild(input);
-});
-
-document.getElementById("bookingForm").addEventListener("submit", async e=>{
+document.getElementById("bookingForm").addEventListener("submit",async e=>{
   e.preventDefault();
-  const btn=e.target.querySelector("button[type=submit]");
-  btn.disabled=true;
-  btn.textContent="📤 送出中...";
 
-  const endValue=endSelect.value==="其他"?endCustom.value.trim():endSelect.value;
-  const viaPoints=[...document.getElementsByClassName("via-input")].map(v=>v.value.trim()).filter(v=>v).join("、")||"無";
+  const btn=e.target.querySelector("button");
+  btn.disabled=true;
+  btn.textContent="送出中…";
 
   const payload={
-    date:document.getElementById("date").value,
-    time:document.getElementById("time").value,
-    flight:document.getElementById("flightNumber").value.trim().toUpperCase(),
-    terminal:document.getElementById("terminal").value,
-    start:document.getElementById("startAddress").value.trim(),
-    via:viaPoints,
-    end:endValue,
-    car:document.getElementById("carType").value,
-    luggageNote:document.getElementById("luggageNote").value.trim(),
-    childSeat:document.getElementById("childSeat").value,
-    name:document.getElementById("name").value.trim(),
-    phone:document.getElementById("phone").value.trim()
+    date:date.value,
+    time:time.value,
+    flight:flight.value,
+    terminal:terminal.value,
+    start:start.value,
+    end:end.value,
+    car:car.value,
+    luggageNote:luggageNote.value,
+    childSeat:childSeat.value,
+    via:via.value || "無",
+    name:name.value,
+    phone:phone.value
   };
 
   try{
@@ -137,23 +206,25 @@ document.getElementById("bookingForm").addEventListener("submit", async e=>{
       body:JSON.stringify(payload)
     });
     const data=await res.json();
-    showMsg(data.status==="ok"?"✅ 預約已送出":"❌ 送出失敗",data.status==="ok"?"success":"error");
+    showMsg(
+      data.status==="ok"?"✅ 預約已送出":"❌ 送出失敗",
+      data.status==="ok"?"success":"error"
+    );
     if(data.status==="ok") e.target.reset();
-  }catch(err){
-    console.error(err);
-    showMsg("❌ 送出失敗，請重試","error");
-  }finally{
-    btn.disabled=false;
-    btn.textContent="✅ 送出預約";
+  }catch{
+    showMsg("❌ 無法連線","error");
   }
+
+  btn.disabled=false;
+  btn.textContent="✅ 送出預約";
 });
 
 function showMsg(text,type){
-  const div=document.getElementById("message");
-  div.textContent=text;
-  div.className=type;
-  div.style.display="block";
-  setTimeout(()=>{div.style.display="none";},5000);
+  const m=document.getElementById("message");
+  m.textContent=text;
+  m.className=type;
+  m.style.display="block";
+  setTimeout(()=>m.style.display="none",5000);
 }
 </script>
 </body>

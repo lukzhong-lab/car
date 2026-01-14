@@ -35,18 +35,8 @@ body {
   border-radius: 14px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.5);
 }
-h2 {
-  text-align: center;
-  margin: 0 0 24px;
-  font-size: 24px;
-  color: var(--text-primary);
-}
-label {
-  display: block;
-  margin: 16px 0 6px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
+h2 { text-align: center; margin: 0 0 24px; font-size: 24px; }
+label { display: block; margin: 16px 0 6px; font-weight: 600; }
 input, select {
   width: 100%;
   padding: 12px 14px;
@@ -56,9 +46,7 @@ input, select {
   border: 1px solid var(--border);
   border-radius: var(--radius);
 }
-input::placeholder {
-  color: #6b7280;
-}
+input::placeholder { color: #6b7280; }
 button {
   width: 100%;
   padding: 14px;
@@ -71,9 +59,7 @@ button {
   cursor: pointer;
   margin-top: 24px;
 }
-button:disabled {
-  opacity: 0.6;
-}
+button:disabled { opacity: 0.6; }
 #message {
   display: none;
   margin-top: 16px;
@@ -82,24 +68,11 @@ button:disabled {
   text-align: center;
   font-size: 17px;
 }
-#message.success {
-  background: var(--success-bg);
-  color: var(--success-text);
-}
-#message.error {
-  background: var(--error-bg);
-  color: var(--error-text);
-}
-.note {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin-top: 4px;
-  line-height: 1.4;
-}
-@media (max-width:480px) {
-  body { font-size: 18px; }
-  input, select, button { font-size: 18px; }
-}
+#message.success { background: var(--success-bg); color: var(--success-text); }
+#message.error { background: var(--error-bg); color: var(--error-text); }
+.note { font-size: 14px; color: var(--text-secondary); margin-top: 4px; line-height: 1.4; }
+iframe#hiddenFrame { display: none; }
+@media (max-width:480px) { body, input, select, button { font-size: 18px; } }
 </style>
 </head>
 <body>
@@ -107,13 +80,18 @@ button:disabled {
 <div class="container">
   <h2>🚗 接送預約表單</h2>
 
-  <form id="bookingForm">
+  <iframe name="hiddenFrame" id="hiddenFrame"></iframe>
+
+  <form id="bookingForm" 
+        action="https://script.google.com/macros/s/AKfycbxK3S1SLdWUE0AbsPqXQ9rn5kZxGRo2j0iWSvcx4-Cu3mRsvZ_zeCSv3eMROw9_VtbtTg/exec" 
+        method="POST" 
+        target="hiddenFrame">
 
     <label>📅 日期</label>
-    <input type="date" id="date" required>
+    <input type="date" name="date" required>
 
     <label>🕒 出發時間</label>
-    <input type="time" id="time" required>
+    <input type="time" name="time" required>
     <div class="note">
       ※ 建議提前時間：<br>
       • 國際線：2.5–3 小時前到機場<br>
@@ -121,10 +99,10 @@ button:disabled {
     </div>
 
     <label>✈️ 航班號碼</label>
-    <input type="text" id="flight" required placeholder="例：CI123">
+    <input type="text" name="flight" required placeholder="例：CI123">
 
     <label>🏢 航廈</label>
-    <select id="terminal" required>
+    <select name="terminal" required>
       <option value="">請選擇</option>
       <option value="T1">T1</option>
       <option value="T2">T2</option>
@@ -132,20 +110,20 @@ button:disabled {
     </select>
 
     <label>📍 出發地</label>
-    <input type="text" id="start" required placeholder="例：台中市西屯區">
+    <input type="text" name="start" required placeholder="例：台中市西屯區">
 
     <label>🛣️ 中途停靠（可多個，用 + 分隔）</label>
-    <input type="text" id="via" placeholder="例：台中火車站+高鐵台中站">
+    <input type="text" name="via" placeholder="例：台中火車站+高鐵台中站">
 
     <label>📍 目的地</label>
-    <input type="text" id="end" required list="airportList" placeholder="例：桃園國際機場 或 其他地址">
+    <input type="text" name="end" required list="airportList" placeholder="例：桃園國際機場 或 其他地址">
     <datalist id="airportList">
       <option value="桃園國際機場">
       <option value="松山國際機場">
     </datalist>
 
     <label>🚙 車型（行李參考）</label>
-    <select id="car" required>
+    <select name="car" required>
       <option value="">請選擇</option>
       <option value="舒適轎車">舒適轎車（1–2 件）</option>
       <option value="五座休旅">五座休旅（3–4 件）</option>
@@ -155,20 +133,20 @@ button:disabled {
     <div class="note">※ 行李件數為28–30吋大型行李估計；特殊行李請於備註說明</div>
 
     <label>🧳 行李備註</label>
-    <input type="text" id="luggageNote" placeholder="例：2大2小 + 嬰兒車">
+    <input type="text" name="luggageNote" placeholder="例：2大2小 + 嬰兒車">
 
     <label>🪑 兒童座椅</label>
-    <select id="childSeat">
+    <select name="childSeat">
       <option value="不需要" selected>不需要</option>
       <option value="安全座椅">安全座椅</option>
       <option value="增高墊">增高墊</option>
     </select>
 
     <label>👤 姓名</label>
-    <input type="text" id="name" required>
+    <input type="text" name="name" required>
 
     <label>📱 電話</label>
-    <input type="tel" id="phone" required placeholder="例：0912345678">
+    <input type="tel" name="phone" required placeholder="例：0912345678">
 
     <button type="submit">送出預約</button>
   </form>
@@ -177,99 +155,53 @@ button:disabled {
 </div>
 
 <script>
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwzW_ODiW6zX5u9qBlsZziHPVEXcbCDAIcvfNRZDsCOiB_kla6RozEZam4FWxKMC0WRIg/exec";
-
-document.getElementById("date").value = new Date().toISOString().slice(0,10);
-
 // 航班自動轉大寫
-document.getElementById("flight").addEventListener("blur", e => {
-  e.target.value = e.target.value.trim().toUpperCase();
+document.querySelector('[name="flight"]').addEventListener("blur", function(e) {
+  this.value = this.value.trim().toUpperCase();
 });
 
-document.getElementById("bookingForm").addEventListener("submit", async e => {
-  e.preventDefault();
-  const btn = e.target.querySelector("button");
+// 日期預設今天
+document.querySelector('[name="date"]').value = new Date().toISOString().slice(0,10);
+
+const form = document.getElementById("bookingForm");
+const btn = form.querySelector("button");
+const msgDiv = document.getElementById("message");
+
+form.addEventListener("submit", function(e) {
+  // 簡單前端驗證
+  let valid = true;
+  form.querySelectorAll("[required]").forEach(el => {
+    if (!el.value.trim()) valid = false;
+  });
+  if (!valid) {
+    e.preventDefault();
+    showMsg("請填寫所有必填欄位", "error");
+    return;
+  }
+
   btn.disabled = true;
   btn.textContent = "處理中…";
+  showMsg("正在送出，請稍候...", "success");
+});
 
-  const form = e.target;
-  const payload = {
-    date: form.date.value,
-    time: form.time.value,
-    flight: form.flight.value.trim().toUpperCase(),
-    terminal: form.terminal.value,
-    start: form.start.value.trim(),
-    end: form.end.value.trim(),
-    car: form.car.value,
-    luggageNote: form.luggageNote.value.trim() || "無",
-    childSeat: form.childSeat.value || "不需要",
-    via: form.via.value.trim() || "無",
-    name: form.name.value.trim(),
-    phone: form.phone.value.trim()
-  };
-
-  const required = ["date", "time", "flight", "terminal", "start", "end", "car", "name", "phone"];
-  for (let id of required) {
-    if (!payload[id]) {
-      showMsg("請填寫所有帶 * 的欄位", "error");
-      resetBtn();
-      return;
-    }
-  }
-
-  try {
-    const formData = new URLSearchParams();
-    for (const key in payload) {
-      formData.append(key, payload[key]);
-    }
-
-    const res = await fetch(WEB_APP_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
-      },
-      body: formData
-    });
-
-    if (!res.ok) {
-      throw new Error(`伺服器回應 ${res.status}`);
-    }
-
-    const data = await res.json();
-
-    if (data.status === "ok") {
-      showMsg("預約已送出，我們會盡快確認", "success");
-      form.reset();
-      form.date.value = new Date().toISOString().slice(0,10);
-      form.childSeat.value = "不需要";
-    } else {
-      showMsg(data.message || "送出失敗，請稍後再試", "error");
-    }
-  } catch (err) {
-    let msg = "連線失敗，請檢查網路或稍後再試";
-    if (err.message.includes("NetworkError") || err.message.includes("Failed to fetch")) {
-      msg = "無法連接到伺服器，請確認網路是否正常";
-    } else if (err.message.includes("伺服器回應")) {
-      msg = "伺服器發生問題，請稍後再試";
-    }
-    showMsg(msg, "error");
-  }
-
-  resetBtn();
+// 當 iframe 載入完成（提交後）
+document.getElementById("hiddenFrame").addEventListener("load", function() {
+  // 因為 GAS 回應是 JSON，iframe 無法直接讀取內容
+  // 但如果 Telegram 已收到 → 代表成功
+  // 這裡簡單假設成功（實際以 Telegram 收到為準）
+  showMsg("預約已送出，我們會盡快確認！", "success");
+  form.reset();
+  document.querySelector('[name="date"]').value = new Date().toISOString().slice(0,10);
+  document.querySelector('[name="childSeat"]').value = "不需要";
+  btn.disabled = false;
+  btn.textContent = "送出預約";
 });
 
 function showMsg(text, type) {
-  const m = document.getElementById("message");
-  m.textContent = text;
-  m.className = type;
-  m.style.display = "block";
-  setTimeout(() => m.style.display = "none", 6000);
-}
-
-function resetBtn() {
-  const btn = document.querySelector("button");
-  btn.disabled = false;
-  btn.textContent = "送出預約";
+  msgDiv.textContent = text;
+  msgDiv.className = type;
+  msgDiv.style.display = "block";
+  setTimeout(() => { msgDiv.style.display = "none"; }, 8000);
 }
 </script>
 </body>

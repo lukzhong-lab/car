@@ -83,7 +83,7 @@ iframe#hiddenFrame { display: none; }
   <iframe name="hiddenFrame" id="hiddenFrame"></iframe>
 
   <form id="bookingForm" 
-        action="https://script.google.com/macros/s/AKfycbxK3S1SLdWUE0AbsPqXQ9rn5kZxGRo2j0iWSvcx4-Cu3mRsvZ_zeCSv3eMROw9_VtbtTg/exec" 
+        action="https://script.google.com/macros/s/AKfycbyU0ZEJNRPMSMr0J2ioiHrlp2aycWVHbW2o5htzv7KzCRMayeogxNK6gHUZNGgCppVT/exec" 
         method="POST" 
         target="hiddenFrame">
 
@@ -184,11 +184,8 @@ form.addEventListener("submit", function(e) {
   showMsg("正在送出，請稍候...", "success");
 });
 
-// 當 iframe 載入完成（提交後）
+// 提交完成後（iframe 載入）
 document.getElementById("hiddenFrame").addEventListener("load", function() {
-  // 因為 GAS 回應是 JSON，iframe 無法直接讀取內容
-  // 但如果 Telegram 已收到 → 代表成功
-  // 這裡簡單假設成功（實際以 Telegram 收到為準）
   showMsg("預約已送出，我們會盡快確認！", "success");
   form.reset();
   document.querySelector('[name="date"]').value = new Date().toISOString().slice(0,10);

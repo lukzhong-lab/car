@@ -55,12 +55,6 @@ button:disabled{background:#9ca3af;cursor:not-allowed;transform:none;}
   <label>📍 出發地</label>
   <input type="text" id="startAddress" placeholder="完整地址" required>
 
-  <label>🛣️ 中途停靠點</label>
-  <div id="viaContainer">
-    <input type="text" class="via-input" placeholder="例如：台北車站">
-  </div>
-  <button type="button" id="addVia">➕ 新增停靠點</button>
-
   <label>📍 目的地</label>
   <select id="endAddress" required>
     <option value="">請選擇或輸入</option>
@@ -78,7 +72,9 @@ button:disabled{background:#9ca3af;cursor:not-allowed;transform:none;}
     <option value="7人座（行李約3-4件）">7人座（行李約3-4件）</option>
     <option value="8-9座大車（行李6件以上）">8-9座大車（行李6件以上）</option>
   </select>
-  <div class="note">請依實際行李數量選擇車型，若行李超多或有特殊物品請備註</div>
+
+  <label>🧳 行李備註（選填）</label>
+  <input type="text" id="luggageNote" placeholder="例如：大型行李 3 件">
 
   <label>🪑 兒童安全座椅 / 增高墊需求</label>
   <select id="childSeat" required>
@@ -88,14 +84,17 @@ button:disabled{background:#9ca3af;cursor:not-allowed;transform:none;}
     <option value="需要增高墊">需要增高墊（4-12歲）</option>
   </select>
 
+  <label>🛣️ 中途停靠點（選填，可多個）</label>
+  <div id="viaContainer">
+    <input type="text" class="via-input" placeholder="例如：台北車站">
+  </div>
+  <button type="button" id="addVia">➕ 新增停靠點</button>
+
   <label>👤 姓名</label>
   <input type="text" id="name" required>
 
   <label>📱 電話</label>
   <input type="tel" id="phone" placeholder="0912345678 或 +886912345678" required>
-
-  <label>🧳 行李備註（選填）</label>
-  <input type="text" id="luggageNote" placeholder="例如：大行李 3 件">
 
   <button type="submit" id="submitBtn">✅ 送出預約</button>
 </form>
@@ -104,50 +103,37 @@ button:disabled{background:#9ca3af;cursor:not-allowed;transform:none;}
 </div>
 
 <script>
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw-Kguq9k4jfkHEyu0NIZcK7wJZ3csU8NU3_93YGY9JS7auz4pEgsmva8bpepk7vvlB/exec";
-const today = new Date().toISOString().slice(0,10);
-document.getElementById("date").value = today;
+const WEB_APP_URL = "YOUR_DEPLOYED_GAS_URL"; // 替換成你的 Web App URL
+document.getElementById("date").value = new Date().toISOString().slice(0,10);
 
 const endAddress = document.getElementById("endAddress");
 const endCustom = document.getElementById("endAddressCustom");
 endAddress.addEventListener("change", ()=>{
-  if(endAddress.value==="其他"){
-    endCustom.style.display="block";
-    endCustom.required=true;
-  } else {
-    endCustom.style.display="none";
-    endCustom.required=false;
-    endCustom.value="";
-  }
+  endCustom.style.display = endAddress.value==="其他"?"block":"none";
+  endCustom.required = endAddress.value==="其他";
+  if(endAddress.value!=="其他") endCustom.value="";
 });
 
-// 新增中途停靠
 document.getElementById("addVia").addEventListener("click", ()=>{
   const input = document.createElement("input");
   input.type="text";
-  input.placeholder="中途停靠地址";
+  input.placeholder="中途停靠地址（選填）";
   input.className="via-input";
   document.getElementById("viaContainer").appendChild(input);
 });
 
-let lastSubmitTime=0;
+const form = document.getElementById("bookingForm");
 const btn = document.getElementById("submitBtn");
 const msgDiv = document.getElementById("message");
 
-document.getElementById("bookingForm").addEventListener("submit", async (e)=>{
+form.addEventListener("submit", async (e)=>{
   e.preventDefault();
-  const now = Date.now();
-  if(now - lastSubmitTime < 60000){
-    showMsg("❌ 請勿短時間重複送出", "error");
-    return;
-  }
-  lastSubmitTime = now;
-
-  btn.disabled = true;
-  btn.textContent = "📤 送出中...";
+  btn.disabled=true;
+  btn.textContent="📤 送出中...";
 
   const endValue = endAddress.value==="其他"? endCustom.value.trim() : endAddress.value;
-  const viaPoints = [...document.getElementsByClassName("via-input")].map(v=>v.value.trim()).filter(v=>v).join("、") || "無";
+  const viaPoints = [...document.getElementsByClassName("via-input")]
+                     .map(v=>v.value.trim()).filter(v=>v).join("、") || "無";
 
   const payload = {
     date: document.getElementById("date").value,
@@ -158,40 +144,36 @@ document.getElementById("bookingForm").addEventListener("submit", async (e)=>{
     via: viaPoints,
     end: endValue,
     car: document.getElementById("carType").value,
-    childSeat: document.getElementById("childSeat").value,
     luggageNote: document.getElementById("luggageNote").value.trim(),
+    childSeat: document.getElementById("childSeat").value,
     name: document.getElementById("name").value.trim(),
     phone: document.getElementById("phone").value.trim()
   };
 
-  try{
-    const response = await fetch(WEB_APP_URL, {
+  try {
+    const res = await fetch(WEB_APP_URL,{
       method:"POST",
       headers: {"Content-Type":"application/json"},
       body: JSON.stringify(payload)
     });
-    const data = await response.json();
+    const data = await res.json();
     if(data.status==="ok"){
-      showMsg("✅ 預約已送出，Telegram 即時通知", "success");
-      btn.textContent = "✅ 送出成功";
-      setTimeout(()=>{btn.textContent="✅ 送出預約";},2000);
-      document.getElementById("bookingForm").reset();
-      document.getElementById("date").value = today;
+      showMsg("✅ 預約已送出，Telegram 即時通知","success");
+      form.reset();
+      document.getElementById("date").value=new Date().toISOString().slice(0,10);
       endCustom.style.display="none";
-    } else {
-      throw new Error(data.error || "後端錯誤");
-    }
-  }catch(err){
+    } else throw new Error(data.error || "後端錯誤");
+  } catch(err){
     console.error(err);
-    showMsg("❌ 送出失敗，請重試", "error");
-    btn.textContent = "✅ 送出預約";
-  }finally{
+    showMsg("❌ 送出失敗，請重試","error");
+  } finally {
     btn.disabled=false;
+    btn.textContent="✅ 送出預約";
   }
 });
 
 function showMsg(text,type){
-  msgDiv.textContent = text;
+  msgDiv.textContent=text;
   msgDiv.className=type;
   msgDiv.style.display="block";
   msgDiv.style.opacity="1";
@@ -199,6 +181,5 @@ function showMsg(text,type){
   setTimeout(()=>{msgDiv.style.display="none";},5500);
 }
 </script>
-
 </body>
 </html>

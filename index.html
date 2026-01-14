@@ -5,55 +5,40 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>接送預約表單</title>
 <style>
-*{box-sizing:border-box;}
-body{font-family:system-ui,-apple-system,sans-serif;margin:0;padding:15px;background:linear-gradient(135deg,#f5f7fa 0%,#c3cfe2 100%);}
+body{font-family:system-ui;margin:15px;background:#f5f7fa;}
 .container{max-width:600px;margin:0 auto;}
-h2{text-align:center;margin-bottom:30px;}
-label{display:block;margin:15px 0 5px;font-weight:600;}
-input,select,button{width:100%;padding:12px;border-radius:8px;border:1px solid #ccc;margin-bottom:10px;font-size:16px;}
-button{background:linear-gradient(135deg, #10b981, #059669);color:white;border:none;cursor:pointer;transition: all 0.3s;}
-button:hover:not(:disabled){opacity:0.9;transform:translateY(-1px);}
-button:disabled{background:#9ca3af;cursor:not-allowed;transform:none;}
-.note,.warning{font-size:0.9rem;padding:8px;border-radius:6px;margin-bottom:10px;}
-.warning{background:#fef3c7;border-left:4px solid #f59e0b;color:#c2410c;}
-.note{background:#d1fae5;border-left:4px solid #10b981;color:#065f46;}
-#message{display:none;padding:12px;text-align:center;border-radius:8px;margin-top:10px;font-weight:500;opacity:0;transition: opacity 0.5s;}
-#message.success{background:#d1fae5;color:#065f46;border:2px solid #10b981;}
-#message.error{background:#fee2e2;color:#991b1b;border:2px solid #fca5a5;}
-@media(max-width:480px){body{padding:10px;}h2{font-size:1.3rem;}}
+label{display:block;margin:10px 0 3px;font-weight:600;}
+input,select,button{width:100%;padding:10px;margin-bottom:10px;border-radius:6px;border:1px solid #ccc;}
+button{background:linear-gradient(135deg,#10b981,#059669);color:white;border:none;cursor:pointer;}
+button:disabled{background:#9ca3af;cursor:not-allowed;}
+#message{display:none;padding:10px;border-radius:6px;margin-top:10px;text-align:center;}
+#message.success{background:#d1fae5;color:#065f46;}
+#message.error{background:#fee2e2;color:#991b1b;}
 </style>
 </head>
 <body>
-
 <div class="container">
 <h2>🚗 接送預約表單</h2>
-
 <form id="bookingForm">
   <label>📅 日期</label>
   <input type="date" id="date" required>
 
   <label>🕒 出發時間</label>
-  <div class="warning">
-    <strong>抵達機場建議時間：</strong><br>
-    • 國際線：起飛前 2-3 小時<br>
-    • 國內線：起飛前 1 小時，最晚 30 分鐘<br>
-    • 美國航班：起飛前 3 小時
-  </div>
   <input type="time" id="time" required>
 
   <label>✈️ 航班號碼</label>
-  <input type="text" id="flightNumber" placeholder="CI123 / BR456" required oninput="this.value=this.value.toUpperCase();">
+  <input type="text" id="flightNumber" required>
 
   <label>🏢 航廈</label>
   <select id="terminal" required>
-    <option value="">請選擇航廈</option>
+    <option value="">請選航廈</option>
     <option value="T1">T1</option>
     <option value="T2">T2</option>
     <option value="T3">T3</option>
   </select>
 
   <label>📍 出發地</label>
-  <input type="text" id="startAddress" placeholder="完整地址" required>
+  <input type="text" id="startAddress" required>
 
   <label>📍 目的地</label>
   <select id="endAddress" required>
@@ -62,123 +47,113 @@ button:disabled{background:#9ca3af;cursor:not-allowed;transform:none;}
     <option value="松山機場">松山機場</option>
     <option value="其他">其他</option>
   </select>
-  <input type="text" id="endAddressCustom" placeholder="若選其他請填完整地址" style="display:none;margin-top:8px;">
+  <input type="text" id="endAddressCustom" placeholder="若選其他請填完整地址" style="display:none;margin-top:5px;">
 
   <label>🚙 車型選擇（含行李參考）</label>
   <select id="carType" required>
     <option value="">請選車型</option>
-    <option value="舒適轎車（行李約1-2件）">舒適轎車（行李約1-2件）</option>
-    <option value="五座休旅（行李約3-4件）">五座休旅（行李約3-4件）</option>
-    <option value="7人座（行李約3-4件）">7人座（行李約3-4件）</option>
-    <option value="8-9座大車（行李6件以上）">8-9座大車（行李6件以上）</option>
+    <option value="舒適轎車（行李約1-2件）">舒適轎車</option>
+    <option value="五座休旅（行李約3-4件）">五座休旅</option>
+    <option value="7人座（行李約3-4件）">7人座</option>
+    <option value="8-9座大車（行李6件以上）">8-9座大車</option>
   </select>
 
   <label>🧳 行李備註（選填）</label>
-  <input type="text" id="luggageNote" placeholder="例如：大型行李 3 件">
+  <input type="text" id="luggageNote">
 
   <label>🪑 兒童安全座椅 / 增高墊需求</label>
   <select id="childSeat" required>
-    <option value="">請選擇</option>
+    <option value="">請選</option>
     <option value="不需要">不需要</option>
-    <option value="需要安全座椅">需要安全座椅（0-4歲）</option>
-    <option value="需要增高墊">需要增高墊（4-12歲）</option>
+    <option value="需要安全座椅">安全座椅</option>
+    <option value="需要增高墊">增高墊</option>
   </select>
 
-  <label>🛣️ 中途停靠點（選填，可多個）</label>
-  <div id="viaContainer">
-    <input type="text" class="via-input" placeholder="例如：台北車站">
-  </div>
+  <label>🛣️ 中途停靠點（選填）</label>
+  <div id="viaContainer"><input type="text" class="via-input" placeholder="例如：台北車站"></div>
   <button type="button" id="addVia">➕ 新增停靠點</button>
 
   <label>👤 姓名</label>
   <input type="text" id="name" required>
 
   <label>📱 電話</label>
-  <input type="tel" id="phone" placeholder="0912345678 或 +886912345678" required>
+  <input type="tel" id="phone" required>
 
-  <button type="submit" id="submitBtn">✅ 送出預約</button>
+  <button type="submit">✅ 送出預約</button>
 </form>
 
 <div id="message"></div>
 </div>
 
 <script>
-const WEB_APP_URL = "YOUR_DEPLOYED_GAS_URL"; // 替換成你的 Web App URL
-document.getElementById("date").value = new Date().toISOString().slice(0,10);
+const WEB_APP_URL = "你的 Web App URL"; // 替換
 
-const endAddress = document.getElementById("endAddress");
-const endCustom = document.getElementById("endAddressCustom");
-endAddress.addEventListener("change", ()=>{
-  endCustom.style.display = endAddress.value==="其他"?"block":"none";
-  endCustom.required = endAddress.value==="其他";
-  if(endAddress.value!=="其他") endCustom.value="";
+document.getElementById("date").value=new Date().toISOString().slice(0,10);
+
+const endSelect=document.getElementById("endAddress");
+const endCustom=document.getElementById("endAddressCustom");
+endSelect.addEventListener("change",()=>{ 
+  endCustom.style.display=endSelect.value==="其他"?"block":"none"; 
+  endCustom.required=endSelect.value==="其他"; 
+  if(endSelect.value!=="其他") endCustom.value="";
 });
 
-document.getElementById("addVia").addEventListener("click", ()=>{
-  const input = document.createElement("input");
+document.getElementById("addVia").addEventListener("click",()=>{
+  const input=document.createElement("input");
   input.type="text";
   input.placeholder="中途停靠地址（選填）";
   input.className="via-input";
   document.getElementById("viaContainer").appendChild(input);
 });
 
-const form = document.getElementById("bookingForm");
-const btn = document.getElementById("submitBtn");
-const msgDiv = document.getElementById("message");
-
-form.addEventListener("submit", async (e)=>{
+document.getElementById("bookingForm").addEventListener("submit", async e=>{
   e.preventDefault();
+  const btn=e.target.querySelector("button[type=submit]");
   btn.disabled=true;
   btn.textContent="📤 送出中...";
 
-  const endValue = endAddress.value==="其他"? endCustom.value.trim() : endAddress.value;
-  const viaPoints = [...document.getElementsByClassName("via-input")]
-                     .map(v=>v.value.trim()).filter(v=>v).join("、") || "無";
+  const endValue=endSelect.value==="其他"?endCustom.value.trim():endSelect.value;
+  const viaPoints=[...document.getElementsByClassName("via-input")].map(v=>v.value.trim()).filter(v=>v).join("、")||"無";
 
-  const payload = {
-    date: document.getElementById("date").value,
-    time: document.getElementById("time").value,
-    flight: document.getElementById("flightNumber").value.trim().toUpperCase(),
-    terminal: document.getElementById("terminal").value,
-    start: document.getElementById("startAddress").value.trim(),
-    via: viaPoints,
-    end: endValue,
-    car: document.getElementById("carType").value,
-    luggageNote: document.getElementById("luggageNote").value.trim(),
-    childSeat: document.getElementById("childSeat").value,
-    name: document.getElementById("name").value.trim(),
-    phone: document.getElementById("phone").value.trim()
+  const payload={
+    date:document.getElementById("date").value,
+    time:document.getElementById("time").value,
+    flight:document.getElementById("flightNumber").value.trim().toUpperCase(),
+    terminal:document.getElementById("terminal").value,
+    start:document.getElementById("startAddress").value.trim(),
+    via:viaPoints,
+    end:endValue,
+    car:document.getElementById("carType").value,
+    luggageNote:document.getElementById("luggageNote").value.trim(),
+    childSeat:document.getElementById("childSeat").value,
+    name:document.getElementById("name").value.trim(),
+    phone:document.getElementById("phone").value.trim()
   };
 
-  try {
-    const res = await fetch(WEB_APP_URL,{
+  try{
+    const res=await fetch(WEB_APP_URL,{
       method:"POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify(payload)
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(payload)
     });
-    const data = await res.json();
-    if(data.status==="ok"){
-      showMsg("✅ 預約已送出，Telegram 即時通知","success");
-      form.reset();
-      document.getElementById("date").value=new Date().toISOString().slice(0,10);
-      endCustom.style.display="none";
-    } else throw new Error(data.error || "後端錯誤");
-  } catch(err){
+    const data=await res.json();
+    showMsg(data.status==="ok"?"✅ 預約已送出":"❌ 送出失敗",data.status==="ok"?"success":"error");
+    if(data.status==="ok") e.target.reset();
+  }catch(err){
     console.error(err);
     showMsg("❌ 送出失敗，請重試","error");
-  } finally {
+  }finally{
     btn.disabled=false;
     btn.textContent="✅ 送出預約";
   }
 });
 
 function showMsg(text,type){
-  msgDiv.textContent=text;
-  msgDiv.className=type;
-  msgDiv.style.display="block";
-  msgDiv.style.opacity="1";
-  setTimeout(()=>{msgDiv.style.opacity="0";},5000);
-  setTimeout(()=>{msgDiv.style.display="none";},5500);
+  const div=document.getElementById("message");
+  div.textContent=text;
+  div.className=type;
+  div.style.display="block";
+  setTimeout(()=>{div.style.display="none";},5000);
 }
 </script>
 </body>

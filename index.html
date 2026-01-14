@@ -218,10 +218,17 @@ document.getElementById("bookingForm").addEventListener("submit", async e => {
   }
 
   try {
+    const formData = new URLSearchParams();
+    for (const key in payload) {
+      formData.append(key, payload[key]);
+    }
+
     const res = await fetch(WEB_APP_URL, {
       method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify(payload)
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: formData
     });
 
     if (!res.ok) {

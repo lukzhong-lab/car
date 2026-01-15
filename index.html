@@ -2,104 +2,37 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🚗 接送預約表單</title>
-
 <style>
-* { box-sizing: border-box; }
-
-body {
-  margin: 0;
-  padding: 16px;
-  background: #111827;
-  color: #f3f4f6;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont;
-}
-
-.container {
-  max-width: 560px;
-  margin: auto;
-  background: #1f2937;
-  padding: 20px;
-  border-radius: 14px;
-}
-
-h2 {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-label {
-  display: block;
-  margin-top: 16px;
-  font-weight: 600;
-}
-
-input, select {
-  width: 100%;
-  height: 44px;
-  padding: 8px 12px;
-  border-radius: 10px;
-  border: 1px solid #4b5563;
-  background: #374151;
-  color: #f3f4f6;
-  font-size: 16px;
-}
-
-.note {
-  margin-top: 6px;
-  font-size: 14px;
-}
-
-.note.danger {
-  color: #f87171;
-  font-weight: 600;
-}
-
-button {
-  margin-top: 24px;
-  width: 100%;
-  height: 48px;
-  border: none;
-  border-radius: 12px;
-  background: #059669;
-  color: #fff;
-  font-size: 16px;
-  font-weight: 600;
-}
-
-/* 中途停靠 */
-.via-container {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.add-via-btn {
-  margin-top: 8px;
-  background: #374151;
-  color: #e5e7eb;
-  border: 1px dashed #6b7280;
-  border-radius: 10px;
-  height: 44px;
-}
+* {box-sizing:border-box;}
+body{margin:0;padding:16px;background:#111827;color:#f3f4f6;font-family:system-ui;}
+.container{max-width:560px;margin:auto;background:#1f2937;padding:20px;border-radius:14px;}
+h2{text-align:center;margin-bottom:20px;}
+label{display:block;margin-top:16px;font-weight:600;}
+input,select{width:100%;height:44px;padding:8px 12px;border-radius:10px;border:1px solid #4b5563;background:#374151;color:#f3f4f6;font-size:16px;}
+.note{margin-top:6px;font-size:14px;}
+.note.danger{color:#f87171;font-weight:600;}
+button{margin-top:24px;width:100%;height:48px;border:none;border-radius:12px;background:#059669;color:#fff;font-size:16px;font-weight:600;cursor:pointer;}
+.via-container{display:flex;flex-direction:column;gap:8px;}
+.add-via-btn{margin-top:8px;background:#374151;color:#e5e7eb;border:1px dashed #6b7280;border-radius:10px;height:44px;}
 </style>
 </head>
-
 <body>
 <div class="container">
 <h2>🚗 接送預約表單</h2>
-
 <form id="bookingForm">
 
 <label>📅 日期</label>
 <input type="date" name="date" id="dateInput" required>
 
 <label>✈️ 航班時間</label>
-<input type="time" id="flightTime" required>
+<select id="flightTimeSelect" required>
+  <option value="">請選擇</option>
+</select>
 
 <label>🕒 出發時間</label>
-<select name="time" id="departureTime" required></select>
+<select name="time" id="departureTimeSelect" required></select>
 <div class="note danger">⚠️ 建議提前 2 小時抵達機場</div>
 
 <label>✈️ 航班編號</label>
@@ -120,7 +53,6 @@ button {
   <option value="桃園國際機場">桃園國際機場</option>
   <option value="自訂">自訂地址</option>
 </select>
-
 <input type="text" id="customEnd" placeholder="請輸入目的地地址" style="display:none;margin-top:8px">
 
 <div id="terminalBlock" style="display:none;">
@@ -147,13 +79,8 @@ button {
   <option value="安全座椅">安全座椅</option>
   <option value="增高墊">增高墊</option>
 </select>
-
-<input type="number" name="childSeatQty" id="childSeatQty" min="1"
-  placeholder="數量" style="display:none;margin-top:8px">
-
-<div class="note danger">
-  ⚠️ 依台灣法規，4 歲以下或身高未滿 135 公分之兒童須使用適合之安全座椅
-</div>
+<input type="number" name="childSeatQty" id="childSeatQty" min="1" placeholder="數量" style="display:none;margin-top:8px">
+<div class="note danger">⚠️ 依台灣法規，4 歲以下或身高未滿 135 公分之兒童須使用適合之安全座椅</div>
 
 <label>🙋 姓名</label>
 <input type="text" name="name" required>
@@ -162,91 +89,90 @@ button {
 <input type="tel" name="phone" required>
 
 <button type="submit">✅ 送出預約</button>
-
 </form>
 <div id="msg" style="margin-top:16px;"></div>
 </div>
 
 <script>
-/* 出發時間（由航班時間往前推） */
-const flightTime = document.getElementById("flightTime");
-const departure = document.getElementById("departureTime");
+// 日期預設今天
+document.getElementById("dateInput").value = new Date().toISOString().slice(0,10);
 
-flightTime.addEventListener("change", () => {
-  departure.innerHTML = "";
-  if (!flightTime.value) return;
-
-  const [h, m] = flightTime.value.split(":").map(Number);
-  const base = h * 60 + m;
-
-  for (let offset = 240; offset >= 0; offset -= 30) {
-    let t = base - offset;
-    let cross = false;
-    if (t < 0) { t += 1440; cross = true; }
-
-    const hh = String(Math.floor(t / 60)).padStart(2,"0");
-    const mm = String(t % 60).padStart(2,"0");
-
-    const opt = document.createElement("option");
-    opt.value = `${hh}:${mm}`;
-    opt.textContent = `${hh}:${mm}` + (cross ? "（前一日）" : "");
-    if (cross) opt.style.color = "red";
-    departure.appendChild(opt);
+// 生成航班時間下拉（24小時，每15分鐘）
+const flightSelect = document.getElementById("flightTimeSelect");
+for(let h=0;h<24;h++){
+  for(let m=0;m<60;m+=15){
+    const opt=document.createElement("option");
+    opt.value=`${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
+    opt.textContent=`${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
+    flightSelect.appendChild(opt);
   }
-});
+}
 
-/* 中途停靠 */
-document.getElementById("addViaBtn").onclick = () => {
-  const i = document.createElement("input");
-  i.className = "via-item";
-  i.placeholder = "輸入中途地址";
+// 出發時間下拉生成（自動往前4小時，每15分鐘）
+const departureSelect=document.getElementById("departureTimeSelect");
+function updateDepartureOptions(){
+  departureSelect.innerHTML="";
+  const val=flightSelect.value;
+  if(!val)return;
+  let [h,m]=val.split(":").map(Number);
+  let base=h*60+m;
+  for(let offset=240;offset>=0;offset-=15){
+    let t=base-offset;
+    let cross=false;
+    if(t<0){t+=1440;cross=true;}
+    const hh=String(Math.floor(t/60)).padStart(2,"0");
+    const mm=String(t%60).padStart(2,"0");
+    const opt=document.createElement("option");
+    opt.value=`${hh}:${mm}`;
+    opt.textContent=`${hh}:${mm}`+(cross?"（前一日）":"");
+    if(cross)opt.style.color="red";
+    departureSelect.appendChild(opt);
+  }
+}
+flightSelect.addEventListener("change", updateDepartureOptions);
+
+// 中途停靠
+document.getElementById("addViaBtn").onclick=()=>{
+  const i=document.createElement("input");
+  i.type="text";
+  i.className="via-item";
+  i.placeholder="輸入中途地址";
   document.getElementById("viaList").appendChild(i);
 };
 
-/* 目的地 */
-const endSelect = document.getElementById("endSelect");
-const terminalBlock = document.getElementById("terminalBlock");
-const customEnd = document.getElementById("customEnd");
-
-endSelect.onchange = () => {
-  terminalBlock.style.display = endSelect.value === "桃園國際機場" ? "block" : "none";
-  customEnd.style.display = endSelect.value === "自訂" ? "block" : "none";
+// 目的地
+const endSelect=document.getElementById("endSelect");
+const terminalBlock=document.getElementById("terminalBlock");
+const customEnd=document.getElementById("customEnd");
+endSelect.onchange=()=>{
+  terminalBlock.style.display=endSelect.value==="桃園國際機場"?"block":"none";
+  customEnd.style.display=endSelect.value==="自訂"?"block":"none";
 };
 
-/* 兒童座椅 */
-const seatType = document.getElementById("childSeatType");
-const seatQty = document.getElementById("childSeatQty");
-
-seatType.onchange = () => {
-  seatQty.style.display = seatType.value === "不需要" ? "none" : "block";
-  if (seatType.value === "不需要") seatQty.value = "";
+// 兒童座椅
+const seatType=document.getElementById("childSeatType");
+const seatQty=document.getElementById("childSeatQty");
+seatType.onchange=()=>{
+  seatQty.style.display=seatType.value==="不需要"?"none":"block";
+  if(seatType.value==="不需要")seatQty.value="";
 };
 
-/* 送出 */
-document.getElementById("bookingForm").onsubmit = e => {
+// 送出
+document.getElementById("bookingForm").onsubmit=e=>{
   e.preventDefault();
-
-  const obj = {};
-  const fd = new FormData(e.target);
-
+  const obj={};
+  const fd=new FormData(e.target);
   fd.forEach((v,k)=>{
-    if (v && v !== "不需要") obj[k] = v.trim();
+    if(v && v!=="不需要") obj[k]=v.trim();
   });
+  const vias=[...document.querySelectorAll(".via-item")].map(i=>i.value.trim()).filter(Boolean);
+  if(vias.length)obj.via=vias.join(" ➕ ");
+  if(seatType.value!=="不需要") obj.childSeat=seatType.value+(seatQty.value?" x"+seatQty.value:"");
 
-  const vias = [...document.querySelectorAll(".via-item")]
-    .map(i=>i.value.trim()).filter(Boolean);
-  if (vias.length) obj.via = vias.join(" ➕ ");
-
-  if (seatType.value !== "不需要")
-    obj.childSeat = seatType.value + (seatQty.value ? " x"+seatQty.value : "");
-
-  fetch("你的 Apps Script /exec", {
-    method: "POST",
-    body: new URLSearchParams(obj)
-  })
-  .then(r=>r.json())
-  .then(r=>document.getElementById("msg").textContent =
-    r.status==="ok" ? "✅ 已送出" : "❌ 送出失敗");
+  fetch("你的 Apps Script /exec",{
+    method:"POST",
+    body:new URLSearchParams(obj)
+  }).then(r=>r.json()).then(r=>document.getElementById("msg").textContent=r.status==="ok"?"✅ 已送出":"❌ 送出失敗");
 };
 </script>
 </body>

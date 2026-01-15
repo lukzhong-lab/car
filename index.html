@@ -99,38 +99,39 @@ button{margin-top:24px;width:100%;height:48px;border:none;border-radius:12px;bac
 // 日期預設今天
 document.getElementById("dateInput").value = new Date().toISOString().slice(0,10);
 
-// 生成航班時間下拉
-const flightHour = document.getElementById("flightHour");
-const flightMinute = document.getElementById("flightMinute");
+// 生成航班時間下拉（小時）
+const flightHour=document.getElementById("flightHour");
 for(let h=0;h<24;h++){
   const opt=document.createElement("option");
   opt.value=opt.textContent=h.toString().padStart(2,'0');
   flightHour.appendChild(opt);
 }
-for(let m=0;m<60;m+=15){
+// 分鐘下拉每 5 分鐘
+const flightMinute=document.getElementById("flightMinute");
+for(let m=0;m<60;m+=5){
   const opt=document.createElement("option");
   opt.value=opt.textContent=m.toString().padStart(2,'0');
   flightMinute.appendChild(opt);
 }
 
-// 出發時間生成
+// 出發時間生成（航班前 4 小時，每15分鐘）
 const departureSelect=document.getElementById("departureTimeSelect");
 function updateDepartureOptions(){
   departureSelect.innerHTML="";
   const h=parseInt(flightHour.value);
   const m=parseInt(flightMinute.value);
-  if(isNaN(h)||isNaN(m))return;
+  if(isNaN(h)||isNaN(m)) return;
   let base=h*60+m;
   for(let offset=240;offset>=0;offset-=15){
     let t=base-offset;
     let cross=false;
-    if(t<0){t+=1440;cross=true;}
-    const hh=String(Math.floor(t/60)).padStart(2,"0");
-    const mm=String(t%60).padStart(2,"0");
+    if(t<0){t+=1440; cross=true;}
+    const hh=String(Math.floor(t/60)).padStart(2,'0');
+    const mm=String(t%60).padStart(2,'0');
     const opt=document.createElement("option");
     opt.value=`${hh}:${mm}`;
     opt.textContent=`${hh}:${mm}`+(cross?"（前一日）":"");
-    if(cross)opt.style.color="red";
+    if(cross) opt.style.color="red";
     departureSelect.appendChild(opt);
   }
 }
@@ -158,10 +159,10 @@ const seatType=document.getElementById("childSeatType");
 const seatQty=document.getElementById("childSeatQty");
 seatType.onchange=()=>{
   seatQty.style.display=seatType.value==="不需要"?"none":"block";
-  if(seatType.value==="不需要")seatQty.value="";
+  if(seatType.value==="不需要") seatQty.value="";
 };
 
-// 送出
+// 表單送出
 document.getElementById("bookingForm").onsubmit=e=>{
   e.preventDefault();
   const obj={};
@@ -169,15 +170,14 @@ document.getElementById("bookingForm").onsubmit=e=>{
   fd.forEach((v,k)=>{
     if(v && v!=="不需要") obj[k]=v.trim();
   });
-  // 航班時間合併
   obj.flightTime=`${flightHour.value}:${flightMinute.value}`;
   // 中途停靠
   const vias=[...document.querySelectorAll(".via-item")].map(i=>i.value.trim()).filter(Boolean);
-  if(vias.length)obj.via=vias.join(" ➕ ");
+  if(vias.length) obj.via=vias.join(" ➕ ");
   // 兒童座椅
   if(seatType.value!=="不需要") obj.childSeat=seatType.value+(seatQty.value?" x"+seatQty.value:"");
 
-  fetch("你的 Apps Script Web App URL",{
+  fetch("https://script.google.com/macros/s/AKfycbwG-V_zY5OdBVw7SyQIV8yrsvBDDKQqqisk43m2zsiELAcCixnXPBLPrxIrSiMmsgYE/exec",{
     method:"POST",
     body:new URLSearchParams(obj)
   }).then(r=>r.json())

@@ -84,23 +84,11 @@ button{
 <label>🕒 出發時間</label>
 <input type="time" name="time" required>
 <div class="note danger">
-※ 國際線 2.5–3 小時｜國內線 1–1.5 小時
+※ 國際線建議 2.5–3 小時｜國內線 1–1.5 小時
 </div>
 
 <label>✈️ 航班號碼</label>
-<input type="text" name="flight" required placeholder="例：CI123">
-
-<!-- 航廈（機場才顯示） -->
-<div id="terminalBlock" style="display:none;">
-  <label>🏢 航廈</label>
-  <select name="terminal" id="terminalSelect">
-    <option value="">請選擇航廈</option>
-    <option value="T1航廈">T1 航廈</option>
-    <option value="T2航廈">T2 航廈</option>
-    <option value="T3航廈">T3 航廈</option>
-  </select>
-  <div class="note">※ 僅機場接送需選擇</div>
-</div>
+<input type="text" name="flight" placeholder="例：CI123">
 
 <label>📍 出發地</label>
 <input type="text" name="start" required>
@@ -126,26 +114,43 @@ button{
 ※ 請填寫完整地址
 </div>
 
+<!-- 航廈（目的地為機場時顯示） -->
+<div id="terminalBlock" style="display:none;">
+  <label>🏢 航廈</label>
+  <select name="terminal" id="terminalSelect">
+    <option value="">請選擇航廈</option>
+    <option value="T1">T1 航廈</option>
+    <option value="T2">T2 航廈</option>
+    <option value="T3">T3 航廈</option>
+  </select>
+</div>
+
 <label>🚙 車型</label>
 <select name="car" required>
   <option value="">請選擇</option>
   <option value="舒適轎車">舒適轎車（1–2 件）</option>
   <option value="五座休旅">五座休旅（3–4 件）</option>
   <option value="7人座">7人座（3–4 件）</option>
-  <option value="8-9座大車">8–9 座（6 件↑）</option>
+  <option value="8-9座大車">8–9 座（6 件以上）</option>
 </select>
 
 <label>🧳 行李備註 <span class="note">（可不填）</span></label>
 <input type="text" name="luggageNote">
 
 <label>🪑 兒童座椅</label>
-<select name="childSeat">
-  <option value="不需要">不需要</option>
-  <option value="安全座椅">安全座椅</option>
-  <option value="增高墊">增高墊</option>
-</select>
+<div style="display:flex;gap:8px;align-items:center;margin-top:4px">
+  <select name="childSeatType" style="flex:2;">
+    <option value="不需要">不需要</option>
+    <option value="安全座椅">安全座椅</option>
+    <option value="增高墊">增高墊</option>
+  </select>
+  <input type="number" name="childSeatQty" min="1" placeholder="數量" style="flex:1;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--input);color:var(--text);">
+</div>
 <div class="note danger">
-※ 4 歲以下或身高未滿 150cm 建議使用兒童座椅
+※ 台灣法規提醒：<br>
+・4 歲以下或身高未滿 150cm **必須使用兒童安全座椅**<br>
+・增高墊僅適用於已滿 4 歲且身高接近 150cm 之孩童<br>
+・可依實際需求選擇數量
 </div>
 
 <label>👤 姓名</label>
@@ -161,89 +166,124 @@ button{
 </div>
 
 <script>
-const dateInput=document.querySelector('[name="date"]');
-const weekday=document.getElementById("weekday");
-dateInput.value=new Date().toISOString().slice(0,10);
+const dateInput = document.querySelector('[name="date"]');
+const weekday = document.getElementById("weekday");
+dateInput.value = new Date().toISOString().slice(0,10);
 updateDay();
-dateInput.onchange=updateDay;
+dateInput.onchange = updateDay;
 function updateDay(){
-  const w=["日","一","二","三","四","五","六"];
-  weekday.textContent="星期"+w[new Date(dateInput.value).getDay()];
+  const w = ["日","一","二","三","四","五","六"];
+  weekday.textContent = `(${w[new Date(dateInput.value).getDay()]})`;
 }
 
-document.querySelector('[name="flight"]').onblur=e=>{
-  e.target.value=e.target.value.trim().toUpperCase();
+document.querySelector('[name="flight"]').onblur = e => {
+  e.target.value = e.target.value.trim().toUpperCase();
 };
 
 function addVia(){
-  const i=document.createElement("input");
-  i.className="via-item";
-  i.placeholder="輸入中途地址";
+  const i = document.createElement("input");
+  i.className = "via-item";
+  i.placeholder = "輸入中途地址";
   document.getElementById("viaList").appendChild(i);
 }
 
-const endSelect=document.getElementById("endSelect");
-const customEnd=document.getElementById("customEnd");
-const customEndNote=document.getElementById("customEndNote");
-const terminalBlock=document.getElementById("terminalBlock");
-const terminalSelect=document.getElementById("terminalSelect");
+const endSelect = document.getElementById("endSelect");
+const customEnd = document.getElementById("customEnd");
+const customEndNote = document.getElementById("customEndNote");
+const terminalBlock = document.getElementById("terminalBlock");
+const terminalSelect = document.getElementById("terminalSelect");
 
-endSelect.onchange=()=>{
-  const airport=["桃園國際機場","松山國際機場"].includes(endSelect.value);
-
-  terminalBlock.style.display=airport?"block":"none";
-  terminalSelect.required=airport;
+endSelect.onchange = () => {
+  const airport = ["桃園國際機場","松山國際機場"].includes(endSelect.value);
+  terminalBlock.style.display = airport ? "block" : "none";
+  terminalSelect.required = airport;
 
   if(endSelect.value==="自訂"){
-    customEnd.style.display="block";
-    customEndNote.style.display="block";
-    customEnd.required=true;
-  }else{
-    customEnd.style.display="none";
-    customEndNote.style.display="none";
-    customEnd.required=false;
-    customEnd.value="";
+    customEnd.style.display = "block";
+    customEndNote.style.display = "block";
+    customEnd.required = true;
+  } else {
+    customEnd.style.display = "none";
+    customEndNote.style.display = "none";
+    customEnd.required = false;
+    customEnd.value = "";
   }
 
   if(!airport){
-    terminalSelect.value="";
+    terminalSelect.value = "";
   }
 };
 
-const form=document.getElementById("bookingForm");
-const msg=document.getElementById("message");
+const form = document.getElementById("bookingForm");
+const msg = document.getElementById("message");
 
-form.onsubmit=e=>{
+form.onsubmit = e => {
   e.preventDefault();
 
-  let ok=true;
-  form.querySelectorAll("[required]").forEach(i=>{
+  let ok = true;
+  form.querySelectorAll("[required]").forEach(i => {
     if(!i.value.trim()) ok=false;
   });
-  if(!ok){show("請填寫所有必填欄位","error");return;}
+  if(!ok){ show("請填寫所有必填欄位","error"); return; }
 
-  const obj={};
+  const obj = {};
   new FormData(form).forEach((v,k)=>obj[k]=v);
 
-  if(obj.end==="自訂"){
-    obj.end=customEnd.value.trim();
+  if(obj.end==="自訂") obj.end = customEnd.value.trim();
+
+  const viaList = [...document.querySelectorAll(".via-item")].map(i=>i.value.trim()).filter(Boolean);
+  obj.via = viaList.length ? viaList.join(" ➕ ") : "";
+
+  if(obj.childSeatType && obj.childSeatType!=="不需要"){
+    obj.childSeat = `${obj.childSeatType}${obj.childSeatQty?(' x'+obj.childSeatQty):''}`;
+  } else {
+    obj.childSeat = "不需要";
   }
 
-  obj.via=[...document.querySelectorAll(".via-item")]
-    .map(i=>i.value.trim()).filter(Boolean).join("+");
+  const w = ["日","一","二","三","四","五","六"];
+  const weekdayChar = w[new Date(obj.date).getDay()];
+
+  let message = `🚗 新接送預約\n────────────────\n`;
+  message += `📅 日期：${obj.date} (${weekdayChar})\n`;
+  message += `🕒 時間：${obj.time}\n`;
+  if(obj.flight) message += `✈️ 航班：${obj.flight.toUpperCase()}${obj.terminal?(' ('+obj.terminal+')'):''}\n`;
+  if(obj.start) message += `📍 出發地：${obj.start}\n`;
+  if(obj.via) message += `➡️ 中途停靠：${obj.via}\n`;
+  if(obj.end) message += `🏁 目的地：${obj.end}\n`;
+  if(obj.car) message += `🚙 車型：${obj.car}\n`;
+  if(obj.luggageNote) message += `💼 行李備註：${obj.luggageNote}\n`;
+  if(obj.childSeat && obj.childSeat !== "不需要") message += `👶 兒童座椅：${obj.childSeat}\n`;
+  message += `────────────────\n`;
+  message += `👤 姓名：${obj.name}\n`;
+  message += `📞 電話：${obj.phone}\n`;
+  message += `🕓 建立時間：${new Date().toLocaleString('zh-TW')}`;
 
   fetch("https://script.google.com/macros/s/AKfycbwG-V_zY5OdBVw7SyQIV8yrsvBDDKQqqisk43m2zsiELAcCixnXPBLPrxIrSiMmsgYE/exec",{
     method:"POST",
-    body:new URLSearchParams(obj)
-  }).then(r=>r.json())
-   .then(r=>show(r.status==="ok"?"預約已送出":"送出失敗","success"))
-   .catch(err=>show(err,"error"));
+    body:new URLSearchParams({
+      date: obj.date,
+      time: obj.time,
+      flight: obj.flight,
+      terminal: obj.terminal,
+      start: obj.start,
+      via: obj.via,
+      end: obj.end,
+      car: obj.car,
+      luggageNote: obj.luggageNote,
+      childSeat: obj.childSeat,
+      name: obj.name,
+      phone: obj.phone
+    })
+  })
+  .then(r=>r.json())
+  .then(r=>show(r.status==="ok"?"預約已送出":"送出失敗","success"))
+  .catch(err=>show("送出失敗","error"));
 };
 
 function show(t,c){
-  msg.textContent=t;
-  msg.className=c;
-  msg.style.display="block";
+  msg.textContent = t;
+  msg.className = c;
+  msg.style.display = "block";
   setTimeout(()=>msg.style.display="none",8000);
 }
 </script>

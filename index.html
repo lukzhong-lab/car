@@ -6,14 +6,8 @@
 <title>接送預約表單</title>
 <style>
 :root{
-  --bg-body:#111827;
-  --bg-box:#1f2937;
-  --input:#374151;
-  --border:#4b5563;
-  --text:#f3f4f6;
-  --sub:#9ca3af;
-  --danger:#ef4444;
-  --ok:#065f46;
+  --bg-body:#111827; --bg-box:#1f2937; --input:#374151; --border:#4b5563;
+  --text:#f3f4f6; --sub:#9ca3af; --danger:#ef4444; --ok:#065f46;
 }
 *{box-sizing:border-box}
 body{margin:0;padding:16px;font-family:system-ui;background:var(--bg-body);color:var(--text);}
@@ -160,7 +154,7 @@ const msg=document.getElementById("message");
 form.onsubmit=e=>{
   e.preventDefault();
 
-  // 檢查必填
+  // 必填檢查
   let ok=true;
   form.querySelectorAll("[required]").forEach(i=>{if(!i.value.trim()) ok=false;});
   if(!ok){show("請填寫所有必填欄位","error");return;}
@@ -168,25 +162,24 @@ form.onsubmit=e=>{
   const formData=new FormData(form);
   const obj={};
 
-  // 只送有值且不等於「不需要」
+  // 只送有值且不是「不需要」「無」
   formData.forEach((v,k)=>{
     v=v.trim();
-    if(v && v!=="不需要") obj[k]=v;
+    if(v && v!=="不需要" && v!=="無") obj[k]=v;
   });
 
-  // 處理 childSeat
+  // 處理兒童座椅
   const type=form.querySelector('[name="childSeatType"]').value;
   const qty=form.querySelector('[name="childSeatQty"]').value.trim();
   if(type && type!=="不需要") obj.childSeat=type+(qty?' x'+qty:'');
 
-  // 處理 via
-  const viaList=[...document.querySelectorAll(".via-item")].map(i=>i.value.trim()).filter(Boolean);
+  // 處理中途停靠
+  const viaList=[...document.querySelectorAll(".via-item")].map(i=>i.value.trim()).filter(v=>v && v!=="無");
   if(viaList.length) obj.via=viaList.join(" ➕ ");
 
-  // 處理自訂目的地
+  // 自訂目的地
   if(obj.end==="自訂") obj.end=customEnd.value.trim();
 
-  // 送出
   fetch("https://script.google.com/macros/s/AKfycbwG-V_zY5OdBVw7SyQIV8yrsvBDDKQqqisk43m2zsiELAcCixnXPBLPrxIrSiMmsgYE/exec",{
     method:"POST",
     body:new URLSearchParams(obj)

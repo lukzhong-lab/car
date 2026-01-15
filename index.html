@@ -54,6 +54,13 @@ input[type="number"] {
 .via-container input {
   flex: 1;
 }
+.time-selects {
+  display: flex;
+  gap: 8px;
+}
+.time-selects select {
+  flex: 1;
+}
 button {
   margin-top: 24px;
   padding: 14px;
@@ -93,9 +100,16 @@ button:hover {
 <input type="date" name="date" required>
 <div class="note" id="weekday"></div>
 
-<label>⏰ 出發時間 (24小時制 HH:mm)</label>
-<input type="text" name="time" placeholder="例：14:30" required>
-<div class="note" id="timeNote">請輸入 24 小時制時間，例如 08:00、23:15</div>
+<label>⏰ 出發時間</label>
+<div class="time-selects">
+  <select name="hour" required>
+    <option value="">時</option>
+  </select>
+  <select name="minute" required>
+    <option value="">分</option>
+  </select>
+</div>
+<div class="note">請選擇出發時間 (24 小時制)</div>
 
 <label>✈️ 航班號碼</label>
 <input type="text" name="flight" placeholder="例：CI123">
@@ -200,6 +214,22 @@ endSelect.onchange=()=>{
   if(!airport) terminalSelect.value="";
 };
 
+// 時間下拉選單生成
+const hourSelect = form.querySelector('[name="hour"]');
+const minuteSelect = form.querySelector('[name="minute"]');
+for(let h=0; h<24; h++){
+  const opt = document.createElement('option');
+  opt.value = h.toString().padStart(2,'0');
+  opt.textContent = h.toString().padStart(2,'0');
+  hourSelect.appendChild(opt);
+}
+for(let m=0; m<60; m+=5){
+  const opt = document.createElement('option');
+  opt.value = m.toString().padStart(2,'0');
+  opt.textContent = m.toString().padStart(2,'0');
+  minuteSelect.appendChild(opt);
+}
+
 // 表單送出
 const form=document.getElementById("bookingForm");
 const msg=document.getElementById("message");
@@ -212,19 +242,22 @@ form.onsubmit = e => {
   form.querySelectorAll("[required]").forEach(i => { if(!i.value.trim()) ok=false; });
   if(!ok){ msg.textContent="⚠️ 請填寫所有必填欄位"; return; }
 
-  // 驗證時間格式 HH:mm 24小時制
-  const timeInput = form.querySelector('[name="time"]');
-  const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
-  if(!timeRegex.test(timeInput.value.trim())){
-    msg.textContent="⚠️ 時間格式錯誤，請輸入 HH:mm (24小時制)";
+  const obj = {};
+
+  // 合併時間
+  const hour = hourSelect.value;
+  const minute = minuteSelect.value;
+  if(!hour || !minute){
+    msg.textContent="⚠️ 請選擇出發時間";
     return;
   }
+  obj.time = hour + ':' + minute;
 
   const formData = new FormData(form);
-  const obj = {};
 
   // 過濾無效欄位 (空白 / 無 / 不需要)
   formData.forEach((v,k)=>{
+    if(k === 'hour' || k==='minute') return; // 時間已處理
     v = v.trim();
     if(v && v !== "無" && v !== "不需要") obj[k] = v;
   });

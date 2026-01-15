@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🚗 接送預約表單</title>
 <style>
-* {box-sizing:border-box;}
 body{margin:0;padding:16px;background:#111827;color:#f3f4f6;font-family:system-ui;}
 .container{max-width:560px;margin:auto;background:#1f2937;padding:20px;border-radius:14px;}
 h2{text-align:center;margin-bottom:20px;}
@@ -16,6 +15,8 @@ input,select{width:100%;height:44px;padding:8px 12px;border-radius:10px;border:1
 button{margin-top:24px;width:100%;height:48px;border:none;border-radius:12px;background:#059669;color:#fff;font-size:16px;font-weight:600;cursor:pointer;}
 .via-container{display:flex;flex-direction:column;gap:8px;}
 .add-via-btn{margin-top:8px;background:#374151;color:#e5e7eb;border:1px dashed #6b7280;border-radius:10px;height:44px;}
+.time-selects{display:flex;gap:8px;}
+.time-selects select{flex:1;}
 </style>
 </head>
 <body>
@@ -27,11 +28,12 @@ button{margin-top:24px;width:100%;height:48px;border:none;border-radius:12px;bac
 <input type="date" name="date" id="dateInput" required>
 
 <label>✈️ 航班時間</label>
-<select id="flightTimeSelect" required>
-  <option value="">請選擇</option>
-</select>
+<div class="time-selects">
+  <select id="flightHour" required><option value="">時</option></select>
+  <select id="flightMinute" required><option value="">分</option></select>
+</div>
 
-<label>🕒 出發時間</label>
+<label>🕒 建議出發時間</label>
 <select name="time" id="departureTimeSelect" required></select>
 <div class="note danger">⚠️ 建議提前 2 小時抵達機場</div>
 
@@ -97,24 +99,27 @@ button{margin-top:24px;width:100%;height:48px;border:none;border-radius:12px;bac
 // 日期預設今天
 document.getElementById("dateInput").value = new Date().toISOString().slice(0,10);
 
-// 生成航班時間下拉（24小時，每15分鐘）
-const flightSelect = document.getElementById("flightTimeSelect");
+// 生成航班時間下拉
+const flightHour = document.getElementById("flightHour");
+const flightMinute = document.getElementById("flightMinute");
 for(let h=0;h<24;h++){
-  for(let m=0;m<60;m+=15){
-    const opt=document.createElement("option");
-    opt.value=`${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
-    opt.textContent=`${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
-    flightSelect.appendChild(opt);
-  }
+  const opt=document.createElement("option");
+  opt.value=opt.textContent=h.toString().padStart(2,'0');
+  flightHour.appendChild(opt);
+}
+for(let m=0;m<60;m+=15){
+  const opt=document.createElement("option");
+  opt.value=opt.textContent=m.toString().padStart(2,'0');
+  flightMinute.appendChild(opt);
 }
 
-// 出發時間下拉生成（自動往前4小時，每15分鐘）
+// 出發時間生成
 const departureSelect=document.getElementById("departureTimeSelect");
 function updateDepartureOptions(){
   departureSelect.innerHTML="";
-  const val=flightSelect.value;
-  if(!val)return;
-  let [h,m]=val.split(":").map(Number);
+  const h=parseInt(flightHour.value);
+  const m=parseInt(flightMinute.value);
+  if(isNaN(h)||isNaN(m))return;
   let base=h*60+m;
   for(let offset=240;offset>=0;offset-=15){
     let t=base-offset;
@@ -129,14 +134,13 @@ function updateDepartureOptions(){
     departureSelect.appendChild(opt);
   }
 }
-flightSelect.addEventListener("change", updateDepartureOptions);
+flightHour.addEventListener("change",updateDepartureOptions);
+flightMinute.addEventListener("change",updateDepartureOptions);
 
 // 中途停靠
 document.getElementById("addViaBtn").onclick=()=>{
   const i=document.createElement("input");
-  i.type="text";
-  i.className="via-item";
-  i.placeholder="輸入中途地址";
+  i.type="text"; i.className="via-item"; i.placeholder="輸入中途地址";
   document.getElementById("viaList").appendChild(i);
 };
 
@@ -165,14 +169,20 @@ document.getElementById("bookingForm").onsubmit=e=>{
   fd.forEach((v,k)=>{
     if(v && v!=="不需要") obj[k]=v.trim();
   });
+  // 航班時間合併
+  obj.flightTime=`${flightHour.value}:${flightMinute.value}`;
+  // 中途停靠
   const vias=[...document.querySelectorAll(".via-item")].map(i=>i.value.trim()).filter(Boolean);
   if(vias.length)obj.via=vias.join(" ➕ ");
+  // 兒童座椅
   if(seatType.value!=="不需要") obj.childSeat=seatType.value+(seatQty.value?" x"+seatQty.value:"");
 
-  fetch("你的 Apps Script /exec",{
+  fetch("你的 Apps Script Web App URL",{
     method:"POST",
     body:new URLSearchParams(obj)
-  }).then(r=>r.json()).then(r=>document.getElementById("msg").textContent=r.status==="ok"?"✅ 已送出":"❌ 送出失敗");
+  }).then(r=>r.json())
+    .then(r=>document.getElementById("msg").textContent=r.status==="ok"?"✅ 已送出":"❌ 送出失敗")
+    .catch(err=>document.getElementById("msg").textContent="❌ 送出失敗");
 };
 </script>
 </body>

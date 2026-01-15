@@ -4,235 +4,248 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>接送預約表單</title>
+
 <style>
-:root {
-  --radius: 10px;
-  --bg-body: #111827;
-  --bg-container: #1f2937;
-  --text-primary: #f3f4f6;
-  --text-secondary: #9ca3af;
-  --border: #4b5563;
-  --input-bg: #374151;
-  --success-bg: #065f46;
-  --success-text: #d1fae5;
-  --error-bg: #7f1d1d;
-  --error-text: #fee2e2;
+:root{
+  --bg-body:#111827;
+  --bg-box:#1f2937;
+  --input:#374151;
+  --border:#4b5563;
+  --text:#f3f4f6;
+  --sub:#9ca3af;
+  --danger:#ef4444;
+  --ok:#065f46;
 }
-*{box-sizing:border-box;}
-body {
-  font-family: system-ui, -apple-system, sans-serif;
-  margin: 0;
-  padding: 16px;
-  background: var(--bg-body);
-  color: var(--text-primary);
-  font-size: 17px;
+*{box-sizing:border-box}
+body{
+  margin:0;padding:16px;
+  font-family:system-ui;
+  background:var(--bg-body);
+  color:var(--text);
 }
-.container {
-  max-width: 640px;
-  margin: auto;
-  background: var(--bg-container);
-  padding: 20px;
-  border-radius: 14px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+.container{
+  max-width:640px;
+  margin:auto;
+  background:var(--bg-box);
+  padding:20px;
+  border-radius:14px;
 }
-h2 { text-align: center; margin: 0 0 24px; font-size: 24px; }
-label { display: block; margin: 16px 0 6px; font-weight: 600; }
-input, select {
-  width: 100%;
-  padding: 12px 14px;
-  font-size: 17px;
-  background: var(--input-bg);
-  color: var(--text-primary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+h2{text-align:center;margin-bottom:24px}
+label{display:block;margin-top:16px;font-weight:600}
+input,select{
+  width:100%;
+  padding:12px;
+  background:var(--input);
+  border:1px solid var(--border);
+  color:var(--text);
+  border-radius:10px;
+  font-size:17px;
 }
-input::placeholder { color: #6b7280; }
-button {
-  width: 100%;
-  padding: 14px;
-  font-size: 18px;
-  font-weight: 600;
-  color: white;
-  background: linear-gradient(135deg, #10b981, #059669);
-  border: none;
-  border-radius: var(--radius);
-  cursor: pointer;
-  margin-top: 24px;
+.note{font-size:14px;color:var(--sub);margin-top:4px}
+.note.danger{color:var(--danger);font-weight:600}
+button{
+  margin-top:24px;
+  width:100%;
+  padding:14px;
+  font-size:18px;
+  font-weight:600;
+  background:linear-gradient(135deg,#10b981,#059669);
+  border:none;border-radius:10px;color:white;
 }
-button:disabled { opacity: 0.6; }
-#message {
-  display: none;
-  margin-top: 16px;
-  padding: 14px;
-  border-radius: var(--radius);
-  text-align: center;
-  font-size: 17px;
+.add-btn{
+  margin-top:8px;
+  padding:10px;
+  width:100%;
+  background:#374151;
+  border:1px dashed var(--border);
+  color:#e5e7eb;
+  border-radius:8px;
 }
-#message.success { background: var(--success-bg); color: var(--success-text); }
-#message.error { background: var(--error-bg); color: var(--error-text); }
-.note { font-size: 14px; color: var(--text-secondary); margin-top: 4px; line-height: 1.4; }
-@media (max-width:480px) { body, input, select, button { font-size: 18px; } }
+.via-item{margin-top:8px}
+#message{
+  display:none;margin-top:16px;
+  padding:14px;text-align:center;border-radius:10px
+}
+#message.success{background:var(--ok)}
+#message.error{background:#7f1d1d}
 </style>
 </head>
+
 <body>
-
 <div class="container">
-  <h2>🚗 接送預約表單</h2>
+<h2>🚗 接送預約表單</h2>
 
-  <form id="bookingForm">
+<form id="bookingForm">
 
-    <label>📅 日期</label>
-    <input type="date" name="date" required>
+<label>📅 日期</label>
+<input type="date" name="date" required>
+<div class="note" id="weekday"></div>
 
-    <label>🕒 出發時間</label>
-    <input type="time" name="time" required>
-    <div class="note">
-      ※ 建議提前時間：<br>
-      • 國際線：2.5–3 小時前到機場<br>
-      • 國內線：1–1.5 小時前到機場
-    </div>
+<label>🕒 出發時間</label>
+<input type="time" name="time" required>
+<div class="note danger">
+※ 國際線 2.5–3 小時｜國內線 1–1.5 小時
+</div>
 
-    <label>✈️ 航班號碼</label>
-    <input type="text" name="flight" required placeholder="例：CI123">
+<label>✈️ 航班號碼</label>
+<input type="text" name="flight" required placeholder="例：CI123">
 
-    <label>🏢 航廈</label>
-    <select name="terminal" required>
-      <option value="">請選擇</option>
-      <option value="T1">T1</option>
-      <option value="T2">T2</option>
-      <option value="T3">T3</option>
-    </select>
+<!-- 航廈（機場才顯示） -->
+<div id="terminalBlock" style="display:none;">
+  <label>🏢 航廈</label>
+  <select name="terminal" id="terminalSelect">
+    <option value="">請選擇航廈</option>
+    <option value="T1航廈">T1 航廈</option>
+    <option value="T2航廈">T2 航廈</option>
+    <option value="T3航廈">T3 航廈</option>
+  </select>
+  <div class="note">※ 僅機場接送需選擇</div>
+</div>
 
-    <label>📍 出發地</label>
-    <input type="text" name="start" required placeholder="例：台中市西屯區">
+<label>📍 出發地</label>
+<input type="text" name="start" required>
 
-    <label>🛣️ 中途停靠（可多個，用 + 分隔）</label>
-    <input type="text" name="via" placeholder="例：台中火車站+高鐵台中站">
+<label>🛣️ 中途停靠</label>
+<div id="viaList">
+  <input type="text" class="via-item" placeholder="輸入中途地址">
+</div>
+<button type="button" class="add-btn" onclick="addVia()">＋ 新增停靠點</button>
 
-    <label>📍 目的地</label>
-    <input type="text" name="end" required list="airportList" placeholder="例：桃園國際機場 或 其他地址">
-    <datalist id="airportList">
-      <option value="桃園國際機場">
-      <option value="松山國際機場">
-    </datalist>
+<label>📍 目的地</label>
+<select name="end" id="endSelect" required>
+  <option value="">請選擇</option>
+  <option value="自訂">自訂地址</option>
+  <option value="桃園國際機場">桃園國際機場</option>
+  <option value="松山國際機場">松山國際機場</option>
+</select>
 
-    <label>🚙 車型（行李參考）</label>
-    <select name="car" required>
-      <option value="">請選擇</option>
-      <option value="舒適轎車">舒適轎車（1–2 件）</option>
-      <option value="五座休旅">五座休旅（3–4 件）</option>
-      <option value="7人座">7人座（3–4 件）</option>
-      <option value="8-9座大車">8-9座大車（6件↑）</option>
-    </select>
-    <div class="note" id="luggageHint">※ 行李件數為28–30吋大型行李估計；特殊行李請於備註說明</div>
+<input id="customEnd" type="text" placeholder="請輸入目的地地址"
+  style="display:none;margin-top:8px">
 
-    <label>🧳 行李備註</label>
-    <input type="text" name="luggageNote" placeholder="例：2大2小 + 嬰兒車">
+<div class="note" id="customEndNote" style="display:none">
+※ 請填寫完整地址
+</div>
 
-    <label>🪑 兒童座椅</label>
-    <select name="childSeat">
-      <option value="不需要" selected>不需要</option>
-      <option value="安全座椅">安全座椅</option>
-      <option value="增高墊">增高墊</option>
-    </select>
+<label>🚙 車型</label>
+<select name="car" required>
+  <option value="">請選擇</option>
+  <option value="舒適轎車">舒適轎車（1–2 件）</option>
+  <option value="五座休旅">五座休旅（3–4 件）</option>
+  <option value="7人座">7人座（3–4 件）</option>
+  <option value="8-9座大車">8–9 座（6 件↑）</option>
+</select>
 
-    <label>👤 姓名</label>
-    <input type="text" name="name" required>
+<label>🧳 行李備註 <span class="note">（可不填）</span></label>
+<input type="text" name="luggageNote">
 
-    <label>📱 電話</label>
-    <input type="tel" name="phone" required placeholder="例：0912345678">
+<label>🪑 兒童座椅</label>
+<select name="childSeat">
+  <option value="不需要">不需要</option>
+  <option value="安全座椅">安全座椅</option>
+  <option value="增高墊">增高墊</option>
+</select>
+<div class="note danger">
+※ 4 歲以下或身高未滿 150cm 建議使用兒童座椅
+</div>
 
-    <button type="submit">送出預約</button>
-  </form>
+<label>👤 姓名</label>
+<input type="text" name="name" required>
 
-  <div id="message"></div>
+<label>📱 電話</label>
+<input type="tel" name="phone" required>
+
+<button type="submit">送出預約</button>
+</form>
+
+<div id="message"></div>
 </div>
 
 <script>
-// 航班自動轉大寫
-document.querySelector('[name="flight"]').addEventListener("blur", function() {
-  this.value = this.value.trim().toUpperCase();
-});
+const dateInput=document.querySelector('[name="date"]');
+const weekday=document.getElementById("weekday");
+dateInput.value=new Date().toISOString().slice(0,10);
+updateDay();
+dateInput.onchange=updateDay;
+function updateDay(){
+  const w=["日","一","二","三","四","五","六"];
+  weekday.textContent="星期"+w[new Date(dateInput.value).getDay()];
+}
 
-// 日期預設今天
-document.querySelector('[name="date"]').value = new Date().toISOString().slice(0,10);
+document.querySelector('[name="flight"]').onblur=e=>{
+  e.target.value=e.target.value.trim().toUpperCase();
+};
 
-const form = document.getElementById("bookingForm");
-const btn = form.querySelector("button");
-const msgDiv = document.getElementById("message");
-const luggageHint = document.getElementById("luggageHint");
+function addVia(){
+  const i=document.createElement("input");
+  i.className="via-item";
+  i.placeholder="輸入中途地址";
+  document.getElementById("viaList").appendChild(i);
+}
 
-// 行李件數提示
-form.querySelector('[name="car"]').addEventListener("change", function(){
-  const hints = {
-    "舒適轎車": "建議行李 1–2 件",
-    "五座休旅": "建議行李 3–4 件",
-    "7人座": "建議行李 3–4 件",
-    "8-9座大車": "建議行李 6 件以上"
-  };
-  luggageHint.textContent = hints[this.value] ? `※ ${hints[this.value]}；特殊行李請於備註說明` :
-    "※ 行李件數為28–30吋大型行李估計；特殊行李請於備註說明";
-});
+const endSelect=document.getElementById("endSelect");
+const customEnd=document.getElementById("customEnd");
+const customEndNote=document.getElementById("customEndNote");
+const terminalBlock=document.getElementById("terminalBlock");
+const terminalSelect=document.getElementById("terminalSelect");
 
-// 表單提交
-form.addEventListener("submit", function(e){
-  e.preventDefault();
+endSelect.onchange=()=>{
+  const airport=["桃園國際機場","松山國際機場"].includes(endSelect.value);
 
-  // 前端簡單驗證
-  let valid = true;
-  form.querySelectorAll("[required]").forEach(el => {
-    if (!el.value.trim()) valid = false;
-  });
-  if(!valid){
-    showMsg("請填寫所有必填欄位", "error");
-    return;
+  terminalBlock.style.display=airport?"block":"none";
+  terminalSelect.required=airport;
+
+  if(endSelect.value==="自訂"){
+    customEnd.style.display="block";
+    customEndNote.style.display="block";
+    customEnd.required=true;
+  }else{
+    customEnd.style.display="none";
+    customEndNote.style.display="none";
+    customEnd.required=false;
+    customEnd.value="";
   }
 
-  btn.disabled = true;
-  btn.textContent = "處理中…";
-  showMsg("正在送出，請稍候...", "success");
+  if(!airport){
+    terminalSelect.value="";
+  }
+};
 
-  // 取得表單資料
-  const data = new FormData(form);
-  const obj = {};
-  data.forEach((v,k) => obj[k] = v);
+const form=document.getElementById("bookingForm");
+const msg=document.getElementById("message");
 
-  // 中途停靠自動格式化
-  if(obj.via) obj.via = obj.via.split('+').map(s => s.trim()).filter(Boolean).join('+');
+form.onsubmit=e=>{
+  e.preventDefault();
 
-  // fetch POST
-  fetch("https://script.google.com/macros/s/AKfycbwG-V_zY5OdBVw7SyQIV8yrsvBDDKQqqisk43m2zsiELAcCixnXPBLPrxIrSiMmsgYE/exec", {
-    method: "POST",
-    body: new URLSearchParams(obj)
-  })
-  .then(res => res.json())
-  .then(r => {
-    if(r.status === "ok"){
-      showMsg("預約已送出，我們會盡快確認！", "success");
-      form.reset();
-      document.querySelector('[name="date"]').value = new Date().toISOString().slice(0,10);
-      document.querySelector('[name="childSeat"]').value = "不需要";
-      luggageHint.textContent = "※ 行李件數為28–30吋大型行李估計；特殊行李請於備註說明";
-    } else {
-      showMsg("送出失敗：" + r.message, "error");
-    }
-    btn.disabled = false;
-    btn.textContent = "送出預約";
-  })
-  .catch(err => {
-    showMsg("送出失敗：" + err, "error");
-    btn.disabled = false;
-    btn.textContent = "送出預約";
+  let ok=true;
+  form.querySelectorAll("[required]").forEach(i=>{
+    if(!i.value.trim()) ok=false;
   });
-});
+  if(!ok){show("請填寫所有必填欄位","error");return;}
 
-function showMsg(text,type){
-  msgDiv.textContent = text;
-  msgDiv.className = type;
-  msgDiv.style.display = "block";
-  setTimeout(()=>{ msgDiv.style.display = "none"; }, 8000);
+  const obj={};
+  new FormData(form).forEach((v,k)=>obj[k]=v);
+
+  if(obj.end==="自訂"){
+    obj.end=customEnd.value.trim();
+  }
+
+  obj.via=[...document.querySelectorAll(".via-item")]
+    .map(i=>i.value.trim()).filter(Boolean).join("+");
+
+  fetch("https://script.google.com/macros/s/AKfycbwG-V_zY5OdBVw7SyQIV8yrsvBDDKQqqisk43m2zsiELAcCixnXPBLPrxIrSiMmsgYE/exec",{
+    method:"POST",
+    body:new URLSearchParams(obj)
+  }).then(r=>r.json())
+   .then(r=>show(r.status==="ok"?"預約已送出":"送出失敗","success"))
+   .catch(err=>show(err,"error"));
+};
+
+function show(t,c){
+  msg.textContent=t;
+  msg.className=c;
+  msg.style.display="block";
+  setTimeout(()=>msg.style.display="none",8000);
 }
 </script>
-
 </body>
 </html>

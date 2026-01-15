@@ -206,7 +206,7 @@ for(let m=0; m<60; m+=5){
   minuteSelect.appendChild(opt);
 }
 
-// 出發提醒紅字（只針對桃園國際機場）
+// 建議出發時間 (航班前 4 小時，跨日自動標註)
 const departureNote = document.getElementById("departureNote");
 function updateDepartureNote() {
   const hour = parseInt(hourSelect.value);
@@ -216,13 +216,19 @@ function updateDepartureNote() {
     return;
   }
 
-  const advanceMinutes = 120; // 2 小時
-  const totalMinutes = hour*60 + minute;
-  const departHomeMinutes = totalMinutes - advanceMinutes;
-  const rHour = Math.floor(departHomeMinutes / 60);
-  const rMinute = departHomeMinutes % 60;
+  const advanceMinutes = 240; // 4 小時
+  const flightDate = new Date(dateInput.value);
+  flightDate.setHours(hour, minute, 0, 0);
 
-  departureNote.textContent = `⚠️ 建議最晚離家時間：${rHour.toString().padStart(2,'0')}:${rMinute.toString().padStart(2,'0')}（含提前抵達機場 2 小時）`;
+  const departTime = new Date(flightDate.getTime() - advanceMinutes*60000);
+
+  const rYear = departTime.getFullYear();
+  const rMonth = (departTime.getMonth()+1).toString().padStart(2,'0');
+  const rDay = departTime.getDate().toString().padStart(2,'0');
+  const rHour = departTime.getHours().toString().padStart(2,'0');
+  const rMinute = departTime.getMinutes().toString().padStart(2,'0');
+
+  departureNote.textContent = `⚠️ 台中到桃園機場建議最晚出發時間：${rYear}-${rMonth}-${rDay} ${rHour}:${rMinute}`;
 }
 
 hourSelect.onchange = updateDepartureNote;
@@ -248,18 +254,15 @@ form.onsubmit = e => {
     if(v && v!=='無' && v!=='不需要') obj[k] = v;
   });
 
-  // 兒童座椅
   const type = form.querySelector('[name="childSeatType"]').value;
   const qty = form.querySelector('[name="childSeatQty"]').value.trim();
   if(type && type!=='不需要') obj.childSeat = type + (qty?' x'+qty:'');
 
-  // 中途停靠
   const viaList = [...document.querySelectorAll(".via-item")]
     .map(i=>i.value.trim())
     .filter(v => v && v!=='無');
   if(viaList.length) obj.via = viaList.join(" ➕ ");
 
-  // 自訂目的地
   if(obj.end==='自訂') obj.end = customEnd.value.trim();
 
   console.log("送出資料:", obj);

@@ -93,8 +93,9 @@ button:hover {
 <input type="date" name="date" required>
 <div class="note" id="weekday"></div>
 
-<label>⏰ 出發時間</label>
-<input type="time" name="time" required>
+<label>⏰ 出發時間 (24小時制 HH:mm)</label>
+<input type="text" name="time" placeholder="例：14:30" required>
+<div class="note" id="timeNote">請輸入 24 小時制時間，例如 08:00、23:15</div>
 
 <label>✈️ 航班號碼</label>
 <input type="text" name="flight" placeholder="例：CI123">
@@ -159,6 +160,7 @@ button:hover {
 </div>
 
 <script>
+// 日期自動顯示星期
 const dateInput=document.querySelector('[name="date"]');
 const weekday=document.getElementById("weekday");
 dateInput.value=new Date().toISOString().slice(0,10);
@@ -169,6 +171,7 @@ function updateDay(){
   weekday.textContent=`(${w[new Date(dateInput.value).getDay()]})`;
 }
 
+// 新增中途停靠
 function addVia(){
   const i=document.createElement("input");
   i.className="via-item";
@@ -176,6 +179,7 @@ function addVia(){
   document.getElementById("viaList").appendChild(i);
 }
 
+// 目的地選擇
 const endSelect=document.getElementById("endSelect");
 const customEnd=document.getElementById("customEnd");
 const terminalBlock=document.getElementById("terminalBlock");
@@ -196,47 +200,58 @@ endSelect.onchange=()=>{
   if(!airport) terminalSelect.value="";
 };
 
+// 表單送出
 const form=document.getElementById("bookingForm");
 const msg=document.getElementById("message");
 
-form.onsubmit=e=>{
+form.onsubmit = e => {
   e.preventDefault();
 
-  // 簡單驗證
-  let ok=true;
-  form.querySelectorAll("[required]").forEach(i=>{if(!i.value.trim()) ok=false;});
-  if(!ok){msg.textContent="⚠️ 請填寫所有必填欄位"; return;}
+  // 驗證必填欄位
+  let ok = true;
+  form.querySelectorAll("[required]").forEach(i => { if(!i.value.trim()) ok=false; });
+  if(!ok){ msg.textContent="⚠️ 請填寫所有必填欄位"; return; }
 
-  const formData=new FormData(form);
-  const obj={};
+  // 驗證時間格式 HH:mm 24小時制
+  const timeInput = form.querySelector('[name="time"]');
+  const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
+  if(!timeRegex.test(timeInput.value.trim())){
+    msg.textContent="⚠️ 時間格式錯誤，請輸入 HH:mm (24小時制)";
+    return;
+  }
 
-  // 只送有值且不是"無"/"不需要"
+  const formData = new FormData(form);
+  const obj = {};
+
+  // 過濾無效欄位 (空白 / 無 / 不需要)
   formData.forEach((v,k)=>{
-    v=v.trim();
-    if(v && v!=="無" && v!=="不需要") obj[k]=v;
+    v = v.trim();
+    if(v && v !== "無" && v !== "不需要") obj[k] = v;
   });
 
   // 兒童座椅合併數量
-  const type=form.querySelector('[name="childSeatType"]').value;
-  const qty=form.querySelector('[name="childSeatQty"]').value.trim();
-  if(type && type!=="不需要") obj.childSeat=type+(qty?' x'+qty:'');
+  const type = form.querySelector('[name="childSeatType"]').value;
+  const qty = form.querySelector('[name="childSeatQty"]').value.trim();
+  if(type && type !== "不需要") obj.childSeat = type + (qty ? ' x'+qty : '');
 
   // 中途停靠合併
-  const viaList=[...document.querySelectorAll(".via-item")].map(i=>i.value.trim()).filter(v=>v && v!=="無");
-  if(viaList.length) obj.via=viaList.join(" ➕ ");
+  const viaList = [...document.querySelectorAll(".via-item")]
+    .map(i=>i.value.trim())
+    .filter(v => v && v !== "無");
+  if(viaList.length) obj.via = viaList.join(" ➕ ");
 
   // 自訂目的地
-  if(obj.end==="自訂") obj.end=customEnd.value.trim();
+  if(obj.end === "自訂") obj.end = customEnd.value.trim();
 
-  console.log("送出資料:", obj); // ✅ 檢查資料
+  console.log("送出資料:", obj);
 
   // 送到 Apps Script
   fetch("https://script.google.com/macros/s/AKfycbwG-V_zY5OdBVw7SyQIV8yrsvBDDKQqqisk43m2zsiELAcCixnXPBLPrxIrSiMmsgYE/exec",{
     method:"POST",
     body:new URLSearchParams(obj)
   }).then(r=>r.json())
-    .then(r=>msg.textContent=(r.status==="ok"?"✅ 送出成功":"❌ 送出失敗"))
-    .catch(err=>msg.textContent="❌ 送出失敗");
+    .then(r=> msg.textContent = (r.status==="ok"?"✅ 送出成功":"❌ 送出失敗"))
+    .catch(err=> msg.textContent = "❌ 送出失敗");
 };
 </script>
 </body>

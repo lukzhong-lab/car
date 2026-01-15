@@ -1,250 +1,45 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>接送預約表單</title>
-<style>
-body { font-family: system-ui; background: #111827; color: #f3f4f6; padding: 16px; line-height: 1.6; }
-.container { max-width: 640px; margin: auto; background: #1f2937; padding: 20px; border-radius: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-h2 { text-align: center; margin-bottom: 24px; }
-label { display: block; margin-top: 16px; font-weight: 600; }
-input, select, button { width: 100%; box-sizing: border-box; }
-input, select { padding: 12px 14px; border-radius: 10px; border: 1px solid #4b5563; background: #374151; color: #f3f4f6; font-size: 16px; }
-input[type="number"] { max-width: 120px; display: inline-block; }
-.via-container { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.via-container input { flex: 1; }
-.time-selects { display: flex; gap: 8px; }
-.time-selects select { flex: 1; }
-button { margin-top: 24px; padding: 14px; border: none; border-radius: 10px; background: #059669; color: #fff; font-weight: 600; font-size: 16px; cursor: pointer; transition: 0.2s; }
-button:hover { background: #10b981; }
-.note { font-size: 14px; color: #9ca3af; margin-top: 4px; }
-.note.danger { color: #ef4444; font-weight: 600; }
-@media (max-width: 480px) { body { padding: 12px; } input, select, button { font-size: 15px; padding: 10px 12px; } }
-</style>
-</head>
-<body>
-<div class="container">
-<h2>🚗 接送預約表單</h2>
-<form id="bookingForm">
-
-<label>📅 日期</label>
-<input type="date" name="date" required>
-<div class="note" id="weekday"></div>
-
-<label>⏰ 航班時間</label>
-<div class="time-selects">
-  <select name="hour" required>
-    <option value="">時</option>
-  </select>
-  <select name="minute" required>
-    <option value="">分</option>
-  </select>
-</div>
-<div class="note">請選擇航班時間 (24 小時制)</div>
-<div class="note danger" id="departureNote"></div>
-
-<label>✈️ 航班號碼</label>
-<input type="text" name="flight" placeholder="例：CI123">
-
-<label>📍 出發地</label>
-<input type="text" name="start" required>
-
-<label>🛣️ 中途停靠</label>
-<div id="viaList" class="via-container">
-  <input type="text" class="via-item" placeholder="輸入中途地址">
-</div>
-<button type="button" onclick="addVia()">➕ 新增停靠點</button>
-
-<label>🏁 目的地</label>
-<select name="end" id="endSelect" required>
-  <option value="">請選擇</option>
-  <option value="自訂">自訂地址</option>
-  <option value="桃園國際機場">桃園國際機場</option>
-</select>
-<input id="customEnd" type="text" placeholder="請輸入目的地地址" style="display:none;margin-top:8px">
-
-<div id="terminalBlock" style="display:none;">
-  <label>🛫 航廈</label>
-  <select name="terminal" id="terminalSelect">
-    <option value="">請選擇航廈</option>
-    <option value="T1">T1</option>
-    <option value="T2">T2</option>
-    <option value="T3">T3</option>
-  </select>
-</div>
-
-<label>🚘 車型</label>
-<select name="car" required>
-  <option value="">請選擇</option>
-  <option value="舒適轎車">舒適轎車（1–2 件）</option>
-  <option value="五座休旅">五座休旅（3–4 件）</option>
-  <option value="7人座">7人座（3–4 件）</option>
-  <option value="8-9座大車">8–9 座（6 件以上）</option>
-</select>
-
-<label>🧳 行李備註</label>
-<input type="text" name="luggageNote">
-
-<label>👶 兒童座椅</label>
-<select name="childSeatType">
-  <option value="不需要">不需要</option>
-  <option value="安全座椅">安全座椅</option>
-  <option value="增高墊">增高墊</option>
-</select>
-<input type="number" name="childSeatQty" min="1" placeholder="數量">
-<div class="note">
-  ⚠️ 法規規定：<br>
-  1️⃣ 4 歲以下或體重未達 18kg 的兒童必須使用安全座椅。<br>
-  2️⃣ 4–12 歲或體重 18–36kg 的兒童建議使用增高墊。<br>
-  3️⃣ 超過法定年齡或重量的兒童可使用安全帶。
-</div>
-
-<label>🙋 姓名</label>
-<input type="text" name="name" required>
-
-<label>📞 電話</label>
-<input type="tel" name="phone" required>
-
-<button type="submit">✅ 送出預約</button>
-</form>
-<div id="message" style="margin-top:16px;"></div>
-</div>
-
 <script>
-const form = document.getElementById("bookingForm");
-const msg = document.getElementById("message");
-
-// 日期自動顯示星期
-const dateInput = form.querySelector('[name="date"]');
-const weekday = document.getElementById("weekday");
-dateInput.value = new Date().toISOString().slice(0,10);
-updateDay();
-dateInput.onchange = updateDay;
-function updateDay(){
-  const w=["日","一","二","三","四","五","六"];
-  weekday.textContent=`(${w[new Date(dateInput.value).getDay()]})`;
-}
-
-// 新增中途停靠
-function addVia(){
-  const i = document.createElement("input");
-  i.className = "via-item";
-  i.placeholder = "輸入中途地址";
-  document.getElementById("viaList").appendChild(i);
-}
-
-// 目的地選擇
-const endSelect = document.getElementById("endSelect");
-const customEnd = document.getElementById("customEnd");
-const terminalBlock = document.getElementById("terminalBlock");
-const terminalSelect = document.getElementById("terminalSelect");
-
-endSelect.addEventListener('change', ()=>{
-  const airport = endSelect.value === "桃園國際機場";
-  terminalBlock.style.display = airport ? "block" : "none";
-  terminalSelect.required = airport;
-  if(endSelect.value==="自訂"){
-    customEnd.style.display="block";
-    customEnd.required=true;
-  } else {
-    customEnd.style.display="none";
-    customEnd.required=false;
-    customEnd.value="";
-  }
-  if(!airport) terminalSelect.value="";
-  updateDepartureNote();
-});
-
-// 時間下拉選單生成
-const hourSelect = form.querySelector('[name="hour"]');
-const minuteSelect = form.querySelector('[name="minute"]');
-for(let h=0; h<24; h++){
-  const opt = document.createElement('option');
-  opt.value = h.toString().padStart(2,'0');
-  opt.textContent = h.toString().padStart(2,'0');
-  hourSelect.appendChild(opt);
-}
-for(let m=0; m<60; m+=5){
-  const opt = document.createElement('option');
-  opt.value = m.toString().padStart(2,'0');
-  opt.textContent = m.toString().padStart(2,'0');
-  minuteSelect.appendChild(opt);
-}
-
-// 建議出發時間 (航班前 4 小時，跨日自動標註)
-const departureNote = document.getElementById("departureNote");
-function updateDepartureNote() {
+// 建議出發時間生成（跨日紅色顯示）
+function updateSuggestedDeparture() {
   const hour = parseInt(hourSelect.value);
   const minute = parseInt(minuteSelect.value);
+  if(isNaN(hour) || isNaN(minute)) return;
 
-  if(isNaN(hour) || isNaN(minute) || endSelect.value !== "桃園國際機場") {
-    departureNote.textContent = "";
-    return;
-  }
+  suggestedSelect.innerHTML = ""; // 清空
 
-  const advanceMinutes = 240; // 4 小時
   const flightDate = new Date(dateInput.value);
   flightDate.setHours(hour, minute, 0, 0);
 
-  const departTime = new Date(flightDate.getTime() - advanceMinutes*60000);
+  // 生成前 4 小時到航班時間每 15 分鐘選項
+  for(let mins = 240; mins >= 0; mins -= 15){
+    const d = new Date(flightDate.getTime() - mins*60000);
+    const y = d.getFullYear();
+    const mo = (d.getMonth()+1).toString().padStart(2,'0');
+    const da = d.getDate().toString().padStart(2,'0');
+    const h = d.getHours().toString().padStart(2,'0');
+    const mi = d.getMinutes().toString().padStart(2,'0');
+    const opt = document.createElement('option');
+    opt.value = `${y}-${mo}-${da} ${h}:${mi}`;
+    opt.textContent = `${y}-${mo}-${da} ${h}:${mi}`;
 
-  const rYear = departTime.getFullYear();
-  const rMonth = (departTime.getMonth()+1).toString().padStart(2,'0');
-  const rDay = departTime.getDate().toString().padStart(2,'0');
-  const rHour = departTime.getHours().toString().padStart(2,'0');
-  const rMinute = departTime.getMinutes().toString().padStart(2,'0');
+    // 判斷是否跨日
+    const flightY = flightDate.getFullYear();
+    const flightMo = flightDate.getMonth();
+    const flightDa = flightDate.getDate();
+    if(d.getFullYear() !== flightY || d.getMonth() !== flightMo || d.getDate() !== flightDa){
+      opt.style.color = "red"; // 跨日紅色
+    } else {
+      opt.style.color = "black"; // 同日黑色
+    }
 
-  departureNote.textContent = `⚠️ 台中到桃園機場建議最晚出發時間：${rYear}-${rMonth}-${rDay} ${rHour}:${rMinute}`;
+    suggestedSelect.appendChild(opt);
+  }
+
+  suggestedSelect.selectedIndex = 0; // 預設選前 4 小時
 }
 
-// 監聽航班時間變化
-hourSelect.addEventListener('change', updateDepartureNote);
-minuteSelect.addEventListener('change', updateDepartureNote);
-
-// 頁面載入後立即更新
-window.addEventListener('DOMContentLoaded', updateDepartureNote);
-
-// 表單送出
-form.onsubmit = e => {
-  e.preventDefault();
-  let ok = true;
-  form.querySelectorAll("[required]").forEach(i => { if(!i.value.trim()) ok=false; });
-  if(!ok){ msg.textContent="⚠️ 請填寫所有必填欄位"; return; }
-
-  const obj = {};
-  const hour = hourSelect.value;
-  const minute = minuteSelect.value;
-  if(!hour || !minute){ msg.textContent="⚠️ 請選擇航班時間"; return; }
-  obj.time = hour + ':' + minute;
-
-  const formData = new FormData(form);
-  formData.forEach((v,k)=>{
-    if(k==='hour' || k==='minute') return;
-    v = v.trim();
-    if(v && v!=='無' && v!=='不需要') obj[k] = v;
-  });
-
-  const type = form.querySelector('[name="childSeatType"]').value;
-  const qty = form.querySelector('[name="childSeatQty"]').value.trim();
-  if(type && type!=='不需要') obj.childSeat = type + (qty?' x'+qty:'');
-
-  const viaList = [...document.querySelectorAll(".via-item")]
-    .map(i=>i.value.trim())
-    .filter(v => v && v!=='無');
-  if(viaList.length) obj.via = viaList.join(" ➕ ");
-
-  if(obj.end==='自訂') obj.end = customEnd.value.trim();
-
-  console.log("送出資料:", obj);
-
-  fetch("https://script.google.com/macros/s/AKfycbwG-V_zY5OdBVw7SyQIV8yrsvBDDKQqqisk43m2zsiELAcCixnXPBLPrxIrSiMmsgYE/exec",{
-    method:"POST",
-    body:new URLSearchParams(obj)
-  }).then(r=>r.json())
-  .then(r=> msg.textContent = (r.status==="ok"?"✅ 送出成功":"❌ 送出失敗"))
-  .catch(err=> msg.textContent = "❌ 送出失敗");
-};
+hourSelect.addEventListener('change', updateSuggestedDeparture);
+minuteSelect.addEventListener('change', updateSuggestedDeparture);
+dateInput.addEventListener('change', updateSuggestedDeparture);
+window.addEventListener('DOMContentLoaded', updateSuggestedDeparture);
 </script>
-</body>
-</html>

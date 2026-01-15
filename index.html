@@ -5,40 +5,110 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>接送預約表單</title>
 <style>
-body{font-family:system-ui;background:#111827;color:#f3f4f6;padding:16px;}
-.container{max-width:640px;margin:auto;background:#1f2937;padding:20px;border-radius:14px;}
-label{display:block;margin-top:16px;font-weight:600;}
-input,select{width:100%;padding:12px;border-radius:10px;border:1px solid #4b5563;background:#374151;color:#f3f4f6;}
-button{margin-top:24px;width:100%;padding:14px;border:none;border-radius:10px;background:#059669;color:#fff;font-weight:600;}
-.note{font-size:14px;color:#9ca3af;margin-top:4px;}
-.note.danger{color:#ef4444;font-weight:600;}
+body {
+  font-family: system-ui;
+  background: #111827;
+  color: #f3f4f6;
+  padding: 16px;
+  line-height: 1.6;
+}
+.container {
+  max-width: 640px;
+  margin: auto;
+  background: #1f2937;
+  padding: 20px;
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+h2 {
+  text-align: center;
+  margin-bottom: 24px;
+}
+label {
+  display: block;
+  margin-top: 16px;
+  font-weight: 600;
+}
+input, select, button {
+  width: 100%;
+  box-sizing: border-box;
+}
+input, select {
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #4b5563;
+  background: #374151;
+  color: #f3f4f6;
+  font-size: 16px;
+}
+input[type="number"] {
+  max-width: 120px;
+  display: inline-block;
+}
+.via-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.via-container input {
+  flex: 1;
+}
+button {
+  margin-top: 24px;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  background: #059669;
+  color: #fff;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+button:hover {
+  background: #10b981;
+}
+.note {
+  font-size: 14px;
+  color: #9ca3af;
+  margin-top: 4px;
+}
+.note.danger {
+  color: #ef4444;
+  font-weight: 600;
+}
+@media (max-width: 480px) {
+  body { padding: 12px; }
+  input, select, button { font-size: 15px; padding: 10px 12px; }
+}
 </style>
 </head>
 <body>
 <div class="container">
-<h2>接送預約表單</h2>
+<h2>🚗 接送預約表單</h2>
 <form id="bookingForm">
 
-<label>日期</label>
+<label>📅 日期</label>
 <input type="date" name="date" required>
 <div class="note" id="weekday"></div>
 
-<label>出發時間</label>
+<label>⏰ 出發時間</label>
 <input type="time" name="time" required>
 
-<label>航班號碼</label>
+<label>✈️ 航班號碼</label>
 <input type="text" name="flight" placeholder="例：CI123">
 
-<label>出發地</label>
+<label>📍 出發地</label>
 <input type="text" name="start" required>
 
-<label>中途停靠</label>
-<div id="viaList">
+<label>🛣️ 中途停靠</label>
+<div id="viaList" class="via-container">
   <input type="text" class="via-item" placeholder="輸入中途地址">
 </div>
-<button type="button" onclick="addVia()">＋ 新增停靠點</button>
+<button type="button" onclick="addVia()">➕ 新增停靠點</button>
 
-<label>目的地</label>
+<label>🏁 目的地</label>
 <select name="end" id="endSelect" required>
   <option value="">請選擇</option>
   <option value="自訂">自訂地址</option>
@@ -48,7 +118,7 @@ button{margin-top:24px;width:100%;padding:14px;border:none;border-radius:10px;ba
 <input id="customEnd" type="text" placeholder="請輸入目的地地址" style="display:none;margin-top:8px">
 
 <div id="terminalBlock" style="display:none;">
-  <label>航廈</label>
+  <label>🛫 航廈</label>
   <select name="terminal" id="terminalSelect">
     <option value="">請選擇航廈</option>
     <option value="T1">T1</option>
@@ -57,7 +127,7 @@ button{margin-top:24px;width:100%;padding:14px;border:none;border-radius:10px;ba
   </select>
 </div>
 
-<label>車型</label>
+<label>🚘 車型</label>
 <select name="car" required>
   <option value="">請選擇</option>
   <option value="舒適轎車">舒適轎車（1–2 件）</option>
@@ -66,10 +136,10 @@ button{margin-top:24px;width:100%;padding:14px;border:none;border-radius:10px;ba
   <option value="8-9座大車">8–9 座（6 件以上）</option>
 </select>
 
-<label>行李備註</label>
+<label>🧳 行李備註</label>
 <input type="text" name="luggageNote">
 
-<label>兒童座椅</label>
+<label>👶 兒童座椅</label>
 <select name="childSeatType">
   <option value="不需要">不需要</option>
   <option value="安全座椅">安全座椅</option>
@@ -77,13 +147,13 @@ button{margin-top:24px;width:100%;padding:14px;border:none;border-radius:10px;ba
 </select>
 <input type="number" name="childSeatQty" min="1" placeholder="數量">
 
-<label>姓名</label>
+<label>🙋 姓名</label>
 <input type="text" name="name" required>
 
-<label>電話</label>
+<label>📞 電話</label>
 <input type="tel" name="phone" required>
 
-<button type="submit">送出預約</button>
+<button type="submit">✅ 送出預約</button>
 </form>
 <div id="message" style="margin-top:16px;"></div>
 </div>
@@ -132,39 +202,41 @@ const msg=document.getElementById("message");
 form.onsubmit=e=>{
   e.preventDefault();
 
+  // 簡單驗證
   let ok=true;
   form.querySelectorAll("[required]").forEach(i=>{if(!i.value.trim()) ok=false;});
-  if(!ok){msg.textContent="請填寫所有必填欄位"; return;}
+  if(!ok){msg.textContent="⚠️ 請填寫所有必填欄位"; return;}
 
   const formData=new FormData(form);
   const obj={};
 
-  // 只送有值且不是"無"或"不需要"
+  // 只送有值且不是"無"/"不需要"
   formData.forEach((v,k)=>{
     v=v.trim();
     if(v && v!=="無" && v!=="不需要") obj[k]=v;
   });
 
-  // 處理兒童座椅
+  // 兒童座椅合併數量
   const type=form.querySelector('[name="childSeatType"]').value;
   const qty=form.querySelector('[name="childSeatQty"]').value.trim();
   if(type && type!=="不需要") obj.childSeat=type+(qty?' x'+qty:'');
 
-  // 處理中途停靠
+  // 中途停靠合併
   const viaList=[...document.querySelectorAll(".via-item")].map(i=>i.value.trim()).filter(v=>v && v!=="無");
   if(viaList.length) obj.via=viaList.join(" ➕ ");
 
   // 自訂目的地
   if(obj.end==="自訂") obj.end=customEnd.value.trim();
 
-  console.log("送出資料:", obj); // ✅ 先檢查資料是否正確
+  console.log("送出資料:", obj); // ✅ 檢查資料
 
+  // 送到 Apps Script
   fetch("https://script.google.com/macros/s/AKfycbwG-V_zY5OdBVw7SyQIV8yrsvBDDKQqqisk43m2zsiELAcCixnXPBLPrxIrSiMmsgYE/exec",{
     method:"POST",
     body:new URLSearchParams(obj)
   }).then(r=>r.json())
-    .then(r=>msg.textContent=(r.status==="ok"?"送出成功":"送出失敗"))
-    .catch(err=>msg.textContent="送出失敗");
+    .then(r=>msg.textContent=(r.status==="ok"?"✅ 送出成功":"❌ 送出失敗"))
+    .catch(err=>msg.textContent="❌ 送出失敗");
 };
 </script>
 </body>

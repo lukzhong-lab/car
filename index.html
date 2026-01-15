@@ -66,7 +66,7 @@ button:hover { background: #10b981; }
 <input type="date" name="date" required>
 <div class="note" id="weekday"></div>
 
-<label>⏰ 出發時間</label>
+<label>⏰ 航班時間</label>
 <div class="time-selects">
   <select name="hour" required>
     <option value="">時</option>
@@ -75,7 +75,7 @@ button:hover { background: #10b981; }
     <option value="">分</option>
   </select>
 </div>
-<div class="note">請選擇出發時間 (24 小時制)</div>
+<div class="note">請選擇航班時間 (24 小時制)</div>
 <div class="note danger" id="departureNote"></div>
 
 <label>✈️ 航班號碼</label>
@@ -216,13 +216,13 @@ function updateDepartureNote() {
     return;
   }
 
-  const advanceMinutes = 150; // 2.5 小時
+  const advanceMinutes = 120; // 2 小時
   const totalMinutes = hour*60 + minute;
   const departHomeMinutes = totalMinutes - advanceMinutes;
   const rHour = Math.floor(departHomeMinutes / 60);
   const rMinute = departHomeMinutes % 60;
 
-  departureNote.textContent = `⚠️ 建議最晚離家時間：${rHour.toString().padStart(2,'0')}:${rMinute.toString().padStart(2,'0')}（含提前抵達機場 ${advanceMinutes/60} 小時）`;
+  departureNote.textContent = `⚠️ 建議最晚離家時間：${rHour.toString().padStart(2,'0')}:${rMinute.toString().padStart(2,'0')}（含提前抵達機場 2 小時）`;
 }
 
 hourSelect.onchange = updateDepartureNote;
@@ -238,7 +238,7 @@ form.onsubmit = e => {
   const obj = {};
   const hour = hourSelect.value;
   const minute = minuteSelect.value;
-  if(!hour || !minute){ msg.textContent="⚠️ 請選擇出發時間"; return; }
+  if(!hour || !minute){ msg.textContent="⚠️ 請選擇航班時間"; return; }
   obj.time = hour + ':' + minute;
 
   const formData = new FormData(form);

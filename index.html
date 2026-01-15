@@ -5,56 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>接送預約表單</title>
 <style>
-body {
-  font-family: system-ui;
-  background: #111827;
-  color: #f3f4f6;
-  padding: 16px;
-  line-height: 1.6;
-}
-.container {
-  max-width: 640px;
-  margin: auto;
-  background: #1f2937;
-  padding: 20px;
-  border-radius: 14px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-}
+body { font-family: system-ui; background: #111827; color: #f3f4f6; padding: 16px; line-height: 1.6; }
+.container { max-width: 640px; margin: auto; background: #1f2937; padding: 20px; border-radius: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
 h2 { text-align: center; margin-bottom: 24px; }
 label { display: block; margin-top: 16px; font-weight: 600; }
 input, select, button { width: 100%; box-sizing: border-box; }
-input, select {
-  padding: 12px 14px;
-  border-radius: 10px;
-  border: 1px solid #4b5563;
-  background: #374151;
-  color: #f3f4f6;
-  font-size: 16px;
-}
+input, select { padding: 12px 14px; border-radius: 10px; border: 1px solid #4b5563; background: #374151; color: #f3f4f6; font-size: 16px; }
 input[type="number"] { max-width: 120px; display: inline-block; }
 .via-container { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .via-container input { flex: 1; }
 .time-selects { display: flex; gap: 8px; }
 .time-selects select { flex: 1; }
-button {
-  margin-top: 24px;
-  padding: 14px;
-  border: none;
-  border-radius: 10px;
-  background: #059669;
-  color: #fff;
-  font-weight: 600;
-  font-size: 16px;
-  cursor: pointer;
-  transition: 0.2s;
-}
+button { margin-top: 24px; padding: 14px; border: none; border-radius: 10px; background: #059669; color: #fff; font-weight: 600; font-size: 16px; cursor: pointer; transition: 0.2s; }
 button:hover { background: #10b981; }
 .note { font-size: 14px; color: #9ca3af; margin-top: 4px; }
 .note.danger { color: #ef4444; font-weight: 600; }
-@media (max-width: 480px) {
-  body { padding: 12px; }
-  input, select, button { font-size: 15px; padding: 10px 12px; }
-}
+@media (max-width: 480px) { body { padding: 12px; } input, select, button { font-size: 15px; padding: 10px 12px; } }
 </style>
 </head>
 <body>
@@ -174,7 +140,7 @@ const customEnd = document.getElementById("customEnd");
 const terminalBlock = document.getElementById("terminalBlock");
 const terminalSelect = document.getElementById("terminalSelect");
 
-endSelect.onchange = ()=>{
+endSelect.addEventListener('change', ()=>{
   const airport = endSelect.value === "桃園國際機場";
   terminalBlock.style.display = airport ? "block" : "none";
   terminalSelect.required = airport;
@@ -188,7 +154,7 @@ endSelect.onchange = ()=>{
   }
   if(!airport) terminalSelect.value="";
   updateDepartureNote();
-};
+});
 
 // 時間下拉選單生成
 const hourSelect = form.querySelector('[name="hour"]');
@@ -211,6 +177,7 @@ const departureNote = document.getElementById("departureNote");
 function updateDepartureNote() {
   const hour = parseInt(hourSelect.value);
   const minute = parseInt(minuteSelect.value);
+
   if(isNaN(hour) || isNaN(minute) || endSelect.value !== "桃園國際機場") {
     departureNote.textContent = "";
     return;
@@ -231,8 +198,12 @@ function updateDepartureNote() {
   departureNote.textContent = `⚠️ 台中到桃園機場建議最晚出發時間：${rYear}-${rMonth}-${rDay} ${rHour}:${rMinute}`;
 }
 
-hourSelect.onchange = updateDepartureNote;
-minuteSelect.onchange = updateDepartureNote;
+// 監聽航班時間變化
+hourSelect.addEventListener('change', updateDepartureNote);
+minuteSelect.addEventListener('change', updateDepartureNote);
+
+// 頁面載入後立即更新
+window.addEventListener('DOMContentLoaded', updateDepartureNote);
 
 // 表單送出
 form.onsubmit = e => {

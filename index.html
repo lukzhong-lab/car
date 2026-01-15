@@ -237,12 +237,13 @@ form.onsubmit = e => {
   if(obj.childSeatType && obj.childSeatType!=="不需要"){
     obj.childSeat = `${obj.childSeatType}${obj.childSeatQty?(' x'+obj.childSeatQty):''}`;
   } else {
-    obj.childSeat = "不需要";
+    obj.childSeat = "";
   }
 
   const w = ["日","一","二","三","四","五","六"];
   const weekdayChar = w[new Date(obj.date).getDay()];
 
+  // 只輸出有資料的欄位
   let message = `🚗 新接送預約\n────────────────\n`;
   message += `📅 日期：${obj.date} (${weekdayChar})\n`;
   message += `🕒 時間：${obj.time}\n`;
@@ -252,7 +253,7 @@ form.onsubmit = e => {
   if(obj.end) message += `🏁 目的地：${obj.end}\n`;
   if(obj.car) message += `🚙 車型：${obj.car}\n`;
   if(obj.luggageNote) message += `💼 行李備註：${obj.luggageNote}\n`;
-  if(obj.childSeat && obj.childSeat !== "不需要") message += `👶 兒童座椅：${obj.childSeat}\n`;
+  if(obj.childSeat) message += `👶 兒童座椅：${obj.childSeat}\n`;
   message += `────────────────\n`;
   message += `👤 姓名：${obj.name}\n`;
   message += `📞 電話：${obj.phone}\n`;

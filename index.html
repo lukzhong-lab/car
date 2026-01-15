@@ -76,6 +76,7 @@ button:hover { background: #10b981; }
   </select>
 </div>
 <div class="note">請選擇出發時間 (24 小時制)</div>
+<div class="note danger" id="departureNote"></div>
 
 <label>✈️ 航班號碼</label>
 <input type="text" name="flight" placeholder="例：CI123">
@@ -94,7 +95,6 @@ button:hover { background: #10b981; }
   <option value="">請選擇</option>
   <option value="自訂">自訂地址</option>
   <option value="桃園國際機場">桃園國際機場</option>
-  <option value="松山國際機場">松山國際機場</option>
 </select>
 <input id="customEnd" type="text" placeholder="請輸入目的地地址" style="display:none;margin-top:8px">
 
@@ -127,6 +127,12 @@ button:hover { background: #10b981; }
   <option value="增高墊">增高墊</option>
 </select>
 <input type="number" name="childSeatQty" min="1" placeholder="數量">
+<div class="note">
+  ⚠️ 法規規定：<br>
+  1️⃣ 4 歲以下或體重未達 18kg 的兒童必須使用安全座椅。<br>
+  2️⃣ 4–12 歲或體重 18–36kg 的兒童建議使用增高墊。<br>
+  3️⃣ 超過法定年齡或重量的兒童可使用安全帶。
+</div>
 
 <label>🙋 姓名</label>
 <input type="text" name="name" required>
@@ -169,7 +175,7 @@ const terminalBlock = document.getElementById("terminalBlock");
 const terminalSelect = document.getElementById("terminalSelect");
 
 endSelect.onchange = ()=>{
-  const airport=["桃園國際機場","松山國際機場"].includes(endSelect.value);
+  const airport = endSelect.value === "桃園國際機場";
   terminalBlock.style.display = airport ? "block" : "none";
   terminalSelect.required = airport;
   if(endSelect.value==="自訂"){
@@ -181,6 +187,7 @@ endSelect.onchange = ()=>{
     customEnd.value="";
   }
   if(!airport) terminalSelect.value="";
+  updateDepartureNote();
 };
 
 // 時間下拉選單生成
@@ -199,26 +206,44 @@ for(let m=0; m<60; m+=5){
   minuteSelect.appendChild(opt);
 }
 
+// 出發提醒紅字（只針對桃園國際機場）
+const departureNote = document.getElementById("departureNote");
+function updateDepartureNote() {
+  const hour = parseInt(hourSelect.value);
+  const minute = parseInt(minuteSelect.value);
+  if(isNaN(hour) || isNaN(minute) || endSelect.value !== "桃園國際機場") {
+    departureNote.textContent = "";
+    return;
+  }
+
+  const advanceMinutes = 150; // 2.5 小時
+  const totalMinutes = hour*60 + minute;
+  const departHomeMinutes = totalMinutes - advanceMinutes;
+  const rHour = Math.floor(departHomeMinutes / 60);
+  const rMinute = departHomeMinutes % 60;
+
+  departureNote.textContent = `⚠️ 建議最晚離家時間：${rHour.toString().padStart(2,'0')}:${rMinute.toString().padStart(2,'0')}（含提前抵達機場 ${advanceMinutes/60} 小時）`;
+}
+
+hourSelect.onchange = updateDepartureNote;
+minuteSelect.onchange = updateDepartureNote;
+
 // 表單送出
 form.onsubmit = e => {
   e.preventDefault();
-
   let ok = true;
   form.querySelectorAll("[required]").forEach(i => { if(!i.value.trim()) ok=false; });
   if(!ok){ msg.textContent="⚠️ 請填寫所有必填欄位"; return; }
 
   const obj = {};
-
-  // 合併時間
   const hour = hourSelect.value;
   const minute = minuteSelect.value;
   if(!hour || !minute){ msg.textContent="⚠️ 請選擇出發時間"; return; }
   obj.time = hour + ':' + minute;
 
   const formData = new FormData(form);
-
   formData.forEach((v,k)=>{
-    if(k==='hour' || k==='minute') return; // 時間已處理
+    if(k==='hour' || k==='minute') return;
     v = v.trim();
     if(v && v!=='無' && v!=='不需要') obj[k] = v;
   });
@@ -239,13 +264,12 @@ form.onsubmit = e => {
 
   console.log("送出資料:", obj);
 
-  // Apps Script
   fetch("https://script.google.com/macros/s/AKfycbwG-V_zY5OdBVw7SyQIV8yrsvBDDKQqqisk43m2zsiELAcCixnXPBLPrxIrSiMmsgYE/exec",{
     method:"POST",
     body:new URLSearchParams(obj)
   }).then(r=>r.json())
-    .then(r=> msg.textContent = (r.status==="ok"?"✅ 送出成功":"❌ 送出失敗"))
-    .catch(err=> msg.textContent = "❌ 送出失敗");
+  .then(r=> msg.textContent = (r.status==="ok"?"✅ 送出成功":"❌ 送出失敗"))
+  .catch(err=> msg.textContent = "❌ 送出失敗");
 };
 </script>
 </body>

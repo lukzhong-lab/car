@@ -78,6 +78,10 @@ button{margin-top:16px;width:100%;height:48px;border:none;border-radius:12px;bac
   <option value="8-9座大車">8–9 座大車（6 件以上行李）</option>
 </select>
 
+<!-- 新增行李備註欄位，可免填 -->
+<label>🧳 行李備註（可免填）</label>
+<input type="text" name="luggage" id="luggage" placeholder="例：2件大行李 / 嬰兒車 / 高爾夫球袋">
+
 <label>👶 兒童座椅</label>
 <select name="childSeatType" id="childSeatType">
   <option value="不需要">不需要</option>
@@ -179,8 +183,11 @@ document.getElementById("bookingForm").onsubmit=e=>{
   if(vias.length) obj.via=vias.join(" ➕ ");
   // 兒童座椅
   if(seatType.value!=="不需要") obj.childSeat=seatType.value+(seatQty.value?" x"+seatQty.value:"");
+  // 行李備註
+  const luggage=document.getElementById("luggage").value.trim();
+  if(luggage) obj.luggage=luggage;
 
-  fetch("https://script.google.com/macros/s/AKfycbz2grZc6Btb08fTHZMO94MMkJ5zChNV5fQJRqAHnMcIYU-610BD6iCu5ryPleAZMMo/exec",{
+  fetch("https://script.google.com/macros/s/AKfycbw1Yg28TMMBU4mO-drtsA-qwT7BI96FOXPR0qzKsoKFOKTv24dNM29v7Y5qfwfKAeQQ/exec",{
     method:"POST",
     body:new URLSearchParams(obj)
   }).then(r=>r.json())

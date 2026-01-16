@@ -180,7 +180,7 @@ document.getElementById("bookingForm").onsubmit=e=>{
   // 兒童座椅
   if(seatType.value!=="不需要") obj.childSeat=seatType.value+(seatQty.value?" x"+seatQty.value:"");
 
-  fetch("https://script.google.com/macros/s/AKfycbx_bvmrV99B04xPXQ9wHMTUNdjXh2PlIrZhcBxvSNZJAlemtx5zLw83TeCYkjzMT2Tm/exec",{
+  fetch("https://script.google.com/macros/s/AKfycbyohc3q0Cs_CyPn8v7PxMZ1f7J-y8u6vc14S8uBYhbAXr8vmSbmUzP_0-vPCFQHs9SQ/exec",{
     method:"POST",
     body:new URLSearchParams(obj)
   }).then(r=>r.json())
@@ -190,4 +190,5 @@ document.getElementById("bookingForm").onsubmit=e=>{
 </script>
 </body>
 </html>
+
 
